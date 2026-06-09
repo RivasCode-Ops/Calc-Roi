@@ -16,39 +16,59 @@ Depois de testar, me responda apenas:
 1. De 0 a 10, quão útil foi?
 2. De 0 a 10, quão fácil foi entender?
 3. Você usaria antes de investir em um negócio? (Sim/Não)
-4. O que sentiu falta?
+4. Quantas vezes por ano usaria? (1 / 2-5 / 6-20 / 20+)
+5. O que sentiu falta?
 ```
 
 ---
 
-## Grupos-alvo (5 cada = 20)
+## Público-alvo (20 pessoas)
 
-| Grupo | Contato | Perganta-chave |
+| Perfil | Quantidade | Perganta-chave |
 |---|---|---|
-| Franqueados | Ex-alunos, rede local | "Já analisou uma franquia e se arrependeu?" |
-| Consultores/corretores | Contatos profissionais | "Usaria durante reunião com cliente?" |
-| Pequenos empresários | Comércio local | "Abriria um negócio baseado só nisso?" |
-| Futuros empreendedores | Conhecidos | "O que faltou pra decidir?" |
+| Empresários / futuros empreendedores | 8 | "Abriria um negócio baseado só nisso?" |
+| Consultores / contadores / mentores | 6 | "Usaria durante reunião com cliente?" |
+| Corretores / avaliadores de empresas | 6 | "Isso ajuda a vender ou avaliar um negócio?" |
+
+A pergunta não é "qual grupo gostou mais", mas **"qual grupo quer mais"**.
 
 ---
 
 ## Planilha de coleta
 
 ```
-Nome | Perfil | Utilidade (0-10) | Clareza (0-10) | Usaria? | O que faltou? | Pagaria? | Obs
+Nome | Perfil | Utilidade (0-10) | Clareza (0-10) | Usaria? | Frequência/ano | Faltou? | Pagaria? | Obs
 ```
 
 ---
 
-## Critério de decisão
+## O dado que vale ouro
 
-Pagariam por versão completa:
+Não pergunte "gostou?". Pergunte **"Pagaria por uma versão mais completa?"**.
+
+Respostas possíveis: Sim / Talvez / Não
+
 - 0-2 "Sim" → ferramenta útil, não negócio
 - 3-6 "Sim" → potencial
-- 7+ "Sim" → investir sério
+- 7+ "Sim" → merece atenção séria
+
+## Frequência de uso
+
+Quem responde **6-20+ vezes/ano** vale mais que qualquer nota.
+
+- 1 vez/ano → visitante
+- 20+ vezes/ano → cliente potencial
+
+Cruze frequência com perfil: um segmento com alta frequência é o mercado real.
 
 ---
 
-## Aprendizado principal
+## Três mercados possíveis
 
-Não qual grupo **gostou mais**. Qual grupo **quer mais**. Esse grupo desenha a V2.
+| Mercado | Quem | Problema | Risco |
+|---|---|---|---|
+| Empreendedor final | Dono de academia, cafeteria, franquia | Usa uma vez e vai embora | Baixo retorno |
+| Consultor | Sebrae, contador, mentor, avaliador | Precisa usar repetidamente | Potencial maior |
+| Corretor de empresas | Avaliador, consultor de M&A | Ferramenta de apoio de venda | Maior disposição a pagar |
+
+A hipótese inicial pode estar errada. A validação pode mostrar que o produto não é para empreendedor final, mas para **consultores e corretores** que usam a ferramenta como apoio profissional.

@@ -136,6 +136,61 @@
         .destaque.verde { background: rgba(0,200,83,.12); color: #66e08a; }
         .destaque.amarelo { background: rgba(245,166,35,.12); color: #f5c542; }
         .destaque.vermelho { background: rgba(229,57,53,.12); color: #ef7a7a; }
+        .btn-copiar {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #333;
+            border-radius: 10px;
+            background: transparent;
+            color: #a0a0b0;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            margin-top: 18px;
+        }
+        .btn-copiar:hover {
+            border-color: #00c853;
+            color: #00c853;
+        }
+        .feedback {
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 12px;
+            background: rgba(255,255,255,.03);
+            border: 1px solid #2a2a30;
+        }
+        .fb-pergunta {
+            font-size: 13px;
+            color: #888;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .fb-botoes {
+            display: flex;
+            gap: 10px;
+        }
+        .fb-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #2a2a30;
+            border-radius: 8px;
+            background: transparent;
+            color: #a0a0b0;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+        }
+        .fb-btn:hover { border-color: #00c853; color: #00c853; }
+        .fb-btn.selecionado { border-color: #00c853; background: rgba(0,200,83,.1); color: #00c853; }
+        .fb-obrigado {
+            text-align: center;
+            font-size: 12px;
+            color: #00c853;
+            margin-top: 10px;
+            display: none;
+        }
         .footer {
             margin-top: 20px;
             text-align: center;
@@ -194,6 +249,18 @@
             <div class="linha" style="border-bottom:none"><span class="rot">Diferença (negócio − renda fixa)</span><span class="val" id="r_diff"></span></div>
 
             <div class="destaque" id="destaque"></div>
+
+            <button class="btn-copiar" onclick="copiarAnalise()">Copiar Análise</button>
+
+            <div class="feedback" id="feedback">
+                <p class="fb-pergunta">Você investiria nesse negócio?</p>
+                <div class="fb-botoes">
+                    <button class="fb-btn" data-resp="sim" onclick="feedback('sim')">Sim</button>
+                    <button class="fb-btn" data-resp="nao" onclick="feedback('nao')">Não</button>
+                    <button class="fb-btn" data-resp="talvez" onclick="feedback('talvez')">Talvez</button>
+                </div>
+                <p class="fb-obrigado" id="fb_obrigado"></p>
+            </div>
         </div>
 
         <div class="footer">Isso não é uma recomendação financeira. Consulte um profissional.</div>
@@ -262,6 +329,115 @@
                 rotulo.textContent = 'Melhor deixar aplicado';
                 destaque.innerHTML = 'O negócio geraria <strong>' + fmt(lucro) + '</strong> por mês.<br>Mas o capital aplicado renderia <strong>' + fmt(rfMensal) + '</strong> por mês sem trabalho.<br>Neste cenário, você estaria ganhando <strong>' + fmt(Math.abs(diff)) + ' a menos</strong> do que na renda fixa.';
             }
+        }
+
+        let ultimoResultado = null;
+
+        function copiarAnalise() {
+            if (!ultimoResultado) return;
+            const r = ultimoResultado;
+            const sinal = r.diff >= 0 ? '+' : '−';
+            const texto = [
+                '=== RAIO-X DE NEGÓCIOS ===',
+                '',
+                'INVESTIMENTO: ' + fmt(r.invest),
+                'LUCRO MENSAL: ' + fmt(r.lucro),
+                'RENDA PASSIVA: ' + fmt(r.rf),
+                'DIFERENÇA: ' + sinal + ' ' + fmt(Math.abs(r.diff)),
+                'ROI: ' + r.roi.toFixed(2) + '%',
+                'PAYBACK: ' + (r.payback === Infinity ? '—' : r.payback.toFixed(1) + ' meses'),
+                'VEREDITO: ' + r.veredito,
+                '',
+                'Gerado em https://rivas-code-ops.github.io/Calc-Roi'
+            ].join('\n');
+            navigator.clipboard.writeText(texto).then(() => {
+                const btn = document.querySelector('.btn-copiar');
+                btn.textContent = 'Copiado!';
+                setTimeout(() => { btn.textContent = 'Copiar Análise'; }, 2000);
+            });
+        }
+
+        function feedback(resp) {
+            document.querySelectorAll('.fb-btn').forEach(b => b.classList.remove('selecionado'));
+            document.querySelector(`.fb-btn[data-resp="${resp}"]`).classList.add('selecionado');
+            const obrigado = document.getElementById('fb_obrigado');
+            obrigado.style.display = 'block';
+            obrigado.textContent = resp === 'sim' ? 'Obrigado! Boa sorte no negócio.' : resp === 'nao' ? 'Obrigado! O mercado agradece sua cautela.' : 'Obrigado! Continue avaliando com calma.';
+            console.log('FEEDBACK:', resp, ultimoResultado);
+        }
+
+        function calcular() {
+            const invest = parseFloat(document.getElementById('investimento').value) || 0;
+            const clientes = parseInt(document.getElementById('clientes').value) || 0;
+            const ticket = parseFloat(document.getElementById('ticket').value) || 0;
+            const custos = parseFloat(document.getElementById('custos').value) || 0;
+            const selicAnual = parseFloat(document.getElementById('selic').value) || 0;
+
+            document.getElementById('fb_obrigado').style.display = 'none';
+            document.querySelectorAll('.fb-btn').forEach(b => b.classList.remove('selecionado'));
+
+            if (!invest || !clientes || !ticket || !custos || !selicAnual) {
+                const r = document.getElementById('resultado');
+                r.style.display = 'block';
+                r.className = 'result vermelho';
+                document.getElementById('bola').className = 'bola vermelho';
+                document.getElementById('rotulo').textContent = 'Preencha todos os campos';
+                document.getElementById('destaque').textContent = 'Todos os campos são obrigatórios para gerar a análise.';
+                document.getElementById('feedback').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('feedback').style.display = 'block';
+
+            const fat = clientes * ticket;
+            const lucro = fat - custos;
+            const roi = invest > 0 ? (lucro / invest) * 100 : 0;
+            const payback = lucro > 0 ? invest / lucro : Infinity;
+            const selicMensal = selicAnual / 12;
+            const rfMensal = invest * (selicMensal / 100);
+            const diff = lucro - rfMensal;
+
+            document.getElementById('r_fat').textContent = fmt(fat);
+            document.getElementById('r_lucro').textContent = fmt(lucro);
+            document.getElementById('r_roi').textContent = roi.toFixed(2) + '%';
+            document.getElementById('r_pay').textContent = payback === Infinity ? '—' : payback.toFixed(1) + ' meses';
+            document.getElementById('r_rf').textContent = fmt(rfMensal);
+            document.getElementById('r_diff').textContent = (diff >= 0 ? '+ ' : '− ') + fmt(Math.abs(diff));
+
+            const el = document.getElementById('resultado');
+            const bola = document.getElementById('bola');
+            const rotulo = document.getElementById('rotulo');
+            const destaque = document.getElementById('destaque');
+
+            let veredito;
+
+            if (lucro <= 0) {
+                veredito = 'Prejuízo';
+                el.className = 'result vermelho';
+                bola.className = 'bola vermelho';
+                rotulo.textContent = veredito;
+                destaque.textContent = 'O negócio opera no vermelho. Reveja custos, ticket ou número de clientes.';
+            } else if (diff >= 0 && roi >= (selicMensal * 2 / 100) * 100) {
+                veredito = 'Atrativo';
+                el.className = 'result verde';
+                bola.className = 'bola verde';
+                rotulo.textContent = veredito;
+                destaque.innerHTML = 'Seu negócio geraria <strong>' + fmt(lucro) + '</strong> por mês.<br>O mesmo capital aplicado renderia <strong>' + fmt(rfMensal) + '</strong> por mês.<br>Você está assumindo risco para ganhar <strong>' + fmt(diff) + ' a mais</strong> por mês.';
+            } else if (diff >= 0) {
+                veredito = 'Atenção';
+                el.className = 'result amarelo';
+                bola.className = 'bola amarelo';
+                rotulo.textContent = veredito;
+                destaque.innerHTML = 'O negócio gera <strong>' + fmt(lucro) + '</strong> por mês.<br>A renda fixa renderia <strong>' + fmt(rfMensal) + '</strong> por mês.<br>Diferença positiva de <strong>' + fmt(diff) + '</strong>, mas o retorno sobre o investimento ainda é baixo para o risco.';
+            } else {
+                veredito = 'Melhor deixar aplicado';
+                el.className = 'result vermelho';
+                bola.className = 'bola vermelho';
+                rotulo.textContent = veredito;
+                destaque.innerHTML = 'O negócio geraria <strong>' + fmt(lucro) + '</strong> por mês.<br>Mas o capital aplicado renderia <strong>' + fmt(rfMensal) + '</strong> por mês sem trabalho.<br>Neste cenário, você estaria ganhando <strong>' + fmt(Math.abs(diff)) + ' a menos</strong> do que na renda fixa.';
+            }
+
+            ultimoResultado = { invest, lucro, roi, payback, rf: rfMensal, diff, veredito };
         }
 
         document.querySelectorAll('input').forEach(inp => {

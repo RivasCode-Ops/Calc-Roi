@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vale a Pena? — Raio-X de Negócios</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f11;
+            color: #e1e1e6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .card {
+            background: #1a1a1e;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 560px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,.5);
+        }
+        .badge {
+            display: inline-block;
+            background: #2a2a30;
+            color: #a0a0b0;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+        }
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+        .sub {
+            font-size: 14px;
+            color: #888;
+            line-height: 1.5;
+            margin-bottom: 28px;
+        }
+        .field { margin-bottom: 18px; }
+        .field label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: #a0a0b0;
+            margin-bottom: 5px;
+        }
+        .field input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid #2a2a30;
+            background: #121214;
+            color: #e1e1e6;
+            font-size: 16px;
+            outline: none;
+            transition: border .2s;
+        }
+        .field input:focus { border-color: #00c853; }
+        .field input::placeholder { color: #555; }
+        .row { display: flex; gap: 14px; }
+        .row .field { flex: 1; }
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: #00c853;
+            color: #0f0f11;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity .2s;
+            margin-top: 6px;
+        }
+        button:hover { opacity: .85; }
+        .result {
+            margin-top: 28px;
+            padding: 24px;
+            border-radius: 14px;
+            display: none;
+        }
+        .result.verde { background: #0d2b1a; display: block; }
+        .result.amarelo { background: #2b240d; display: block; }
+        .result.vermelho { background: #2b0d0d; display: block; }
+        .semaforo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .bola {
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .bola.verde { background: #00c853; }
+        .bola.amarelo { background: #f5a623; }
+        .bola.vermelho { background: #e53935; }
+        .rotulo {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .linha {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+        }
+        .linha:last-child { border-bottom: none; }
+        .linha .rot { color: #888; }
+        .linha .val { font-weight: 600; color: #e1e1e6; }
+        .destaque {
+            margin-top: 16px;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .destaque.verde { background: rgba(0,200,83,.12); color: #66e08a; }
+        .destaque.amarelo { background: rgba(245,166,35,.12); color: #f5c542; }
+        .destaque.vermelho { background: rgba(229,57,53,.12); color: #ef7a7a; }
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 11px;
+            color: #444;
+        }
+        @media (max-width: 500px) {
+            .card { padding: 24px; }
+            h1 { font-size: 22px; }
+            .row { flex-direction: column; gap: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="badge">Raio‑X de Negócios</div>
+        <h1>Descubra em 60 segundos se esse negócio realmente vale a pena.</h1>
+        <p class="sub">Compare o lucro com o rendimento do seu dinheiro aplicado e veja se você está investindo ou apenas comprando uma dor de cabeça.</p>
+
+        <div class="field">
+            <label>Quanto você vai investir?</label>
+            <input type="number" id="investimento" placeholder="R$ 200.000" step="100">
+        </div>
+        <div class="row">
+            <div class="field">
+                <label>Clientes esperados</label>
+                <input type="number" id="clientes" placeholder="500" step="1">
+            </div>
+            <div class="field">
+                <label>Ticket médio (por mês)</label>
+                <input type="number" id="ticket" placeholder="R$ 150" step="1">
+            </div>
+        </div>
+        <div class="field">
+            <label>Custos mensais totais</label>
+            <input type="number" id="custos" placeholder="R$ 30.000" step="100">
+        </div>
+        <div class="field">
+            <label>Rendimento da renda fixa (% ao ano)</label>
+            <input type="number" id="selic" placeholder="9,0" step="0.1">
+        </div>
+
+        <button onclick="calcular()">Analisar Viabilidade</button>
+
+        <div class="result" id="resultado">
+            <div class="semaforo">
+                <div class="bola" id="bola"></div>
+                <span class="rotulo" id="rotulo"></span>
+            </div>
+
+            <div class="linha"><span class="rot">Faturamento mensal</span><span class="val" id="r_fat"></span></div>
+            <div class="linha"><span class="rot">Lucro mensal</span><span class="val" id="r_lucro"></span></div>
+            <div class="linha"><span class="rot">ROI mensal</span><span class="val" id="r_roi"></span></div>
+            <div class="linha"><span class="rot">Payback</span><span class="val" id="r_pay"></span></div>
+            <div class="linha"><span class="rot">Renda fixa equivalente (mês)</span><span class="val" id="r_rf"></span></div>
+            <div class="linha" style="border-bottom:none"><span class="rot">Diferença (negócio − renda fixa)</span><span class="val" id="r_diff"></span></div>
+
+            <div class="destaque" id="destaque"></div>
+        </div>
+
+        <div class="footer">Isso não é uma recomendação financeira. Consulte um profissional.</div>
+    </div>
+
+    <script>
+        function fmt(v) {
+            return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function calcular() {
+            const invest = parseFloat(document.getElementById('investimento').value) || 0;
+            const clientes = parseInt(document.getElementById('clientes').value) || 0;
+            const ticket = parseFloat(document.getElementById('ticket').value) || 0;
+            const custos = parseFloat(document.getElementById('custos').value) || 0;
+            const selicAnual = parseFloat(document.getElementById('selic').value) || 0;
+
+            if (!invest || !clientes || !ticket || !custos || !selicAnual) {
+                const r = document.getElementById('resultado');
+                r.style.display = 'block';
+                r.className = 'result vermelho';
+                document.getElementById('bola').className = 'bola vermelho';
+                document.getElementById('rotulo').textContent = 'Preencha todos os campos';
+                document.getElementById('destaque').textContent = 'Todos os campos são obrigatórios para gerar a análise.';
+                return;
+            }
+
+            const fat = clientes * ticket;
+            const lucro = fat - custos;
+            const roi = invest > 0 ? (lucro / invest) * 100 : 0;
+            const payback = lucro > 0 ? invest / lucro : Infinity;
+            const selicMensal = selicAnual / 12;
+            const rfMensal = invest * (selicMensal / 100);
+            const diff = lucro - rfMensal;
+
+            document.getElementById('r_fat').textContent = fmt(fat);
+            document.getElementById('r_lucro').textContent = fmt(lucro);
+            document.getElementById('r_roi').textContent = roi.toFixed(2) + '%';
+            document.getElementById('r_pay').textContent = payback === Infinity ? '—' : payback.toFixed(1) + ' meses';
+            document.getElementById('r_rf').textContent = fmt(rfMensal);
+            document.getElementById('r_diff').textContent = (diff >= 0 ? '+ ' : '− ') + fmt(Math.abs(diff));
+
+            const el = document.getElementById('resultado');
+            const bola = document.getElementById('bola');
+            const rotulo = document.getElementById('rotulo');
+            const destaque = document.getElementById('destaque');
+
+            if (lucro <= 0) {
+                el.className = 'result vermelho';
+                bola.className = 'bola vermelho';
+                rotulo.textContent = 'Prejuízo';
+                destaque.textContent = 'O negócio opera no vermelho. Reveja custos, ticket ou número de clientes.';
+            } else if (diff >= 0 && roi >= (selicMensal * 2 / 100) * 100) {
+                el.className = 'result verde';
+                bola.className = 'bola verde';
+                rotulo.textContent = 'Atrativo';
+                destaque.innerHTML = 'Seu negócio geraria <strong>' + fmt(lucro) + '</strong> por mês.<br>O mesmo capital aplicado renderia <strong>' + fmt(rfMensal) + '</strong> por mês.<br>Você está assumindo risco para ganhar <strong>' + fmt(diff) + ' a mais</strong> por mês.';
+            } else if (diff >= 0) {
+                el.className = 'result amarelo';
+                bola.className = 'bola amarelo';
+                rotulo.textContent = 'Atenção';
+                destaque.innerHTML = 'O negócio gera <strong>' + fmt(lucro) + '</strong> por mês.<br>A renda fixa renderia <strong>' + fmt(rfMensal) + '</strong> por mês.<br>Diferença positiva de <strong>' + fmt(diff) + '</strong>, mas o retorno sobre o investimento ainda é baixo para o risco.';
+            } else {
+                el.className = 'result vermelho';
+                bola.className = 'bola vermelho';
+                rotulo.textContent = 'Melhor deixar aplicado';
+                destaque.innerHTML = 'O negócio geraria <strong>' + fmt(lucro) + '</strong> por mês.<br>Mas o capital aplicado renderia <strong>' + fmt(rfMensal) + '</strong> por mês sem trabalho.<br>Neste cenário, você estaria ganhando <strong>' + fmt(Math.abs(diff)) + ' a menos</strong> do que na renda fixa.';
+            }
+        }
+
+        document.querySelectorAll('input').forEach(inp => {
+            inp.addEventListener('keydown', e => { if (e.key === 'Enter') calcular(); });
+        });
+    </script>
+</body>
+</html>

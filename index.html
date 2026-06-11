@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vale a Pena? — Raio-X de Negócios</title>
-    <meta name="description" content="Calculadora de ROI e viabilidade: compare seu negócio com a renda fixa em 60 segundos.">
+    <title>Raio-X de Negócios + Picos do Saber</title>
+    <meta name="description" content="Calculadoras de ROI, viabilidade e capacidade escolar para gestão.">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -21,10 +21,63 @@
             background: #1a1a1e;
             border-radius: 20px;
             padding: 40px;
-            max-width: 620px;
+            max-width: 680px;
             width: 100%;
             box-shadow: 0 20px 60px rgba(0,0,0,.5);
         }
+        .tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+        .tab {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #2a2a30;
+            border-radius: 10px;
+            background: transparent;
+            color: #888;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .2s;
+        }
+        .tab:hover { border-color: #444; color: #ccc; }
+        .tab.active { border-color: #00c853; color: #00c853; background: rgba(0,200,83,.08); }
+        .panel { display: none; }
+        .panel.active { display: block; }
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: #00c853;
+            color: #0f0f11;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+        .btn-primary:hover { opacity: .85; }
+        .check-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; }
+        .check-row label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #a0a0b0;
+            text-transform: none;
+            letter-spacing: 0;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .check-row input { width: auto; accent-color: #00c853; }
+        .secao-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            color: #666;
+            margin: 20px 0 10px;
+        }
+        .degraus-list { margin: 10px 0 0 18px; font-size: 13px; line-height: 1.6; color: #a0a0b0; }
+        .degraus-list li { margin-bottom: 6px; }
         .badge {
             display: inline-block;
             background: #2a2a30;
@@ -246,6 +299,12 @@
 </head>
 <body>
     <div class="card">
+        <div class="tabs" role="tablist">
+            <button type="button" class="tab active" data-tab="roi" role="tab" aria-selected="true">ROI Negócios</button>
+            <button type="button" class="tab" data-tab="escola" role="tab" aria-selected="false">Picos do Saber</button>
+        </div>
+
+        <div id="panel-roi" class="panel active" role="tabpanel">
         <div class="badge">Raio‑X de Negócios · V2</div>
         <h1>ROI do negócio vs. dinheiro aplicado</h1>
         <p class="sub">Compare lucro mensal, payback e três cenários (pessimista, base, otimista) com o rendimento da renda fixa.</p>
@@ -297,7 +356,7 @@
                 </div>
             </div>
 
-            <button type="button" id="btn-calcular">Analisar viabilidade</button>
+            <button type="button" id="btn-calcular" class="btn-primary">Analisar viabilidade</button>
         </form>
 
         <div class="result" id="resultado" role="region" aria-live="polite" aria-label="Resultado da análise">
@@ -344,19 +403,154 @@
         </div>
 
         <div class="footer">Isso não é recomendação financeira. Consulte um profissional.</div>
+        </div>
+
+        <div id="panel-escola" class="panel" role="tabpanel" hidden>
+            <div class="badge">Picos do Saber · Plano Diretor</div>
+            <h1>Capacidade e viabilidade escolar</h1>
+            <p class="sub">Com X alunos e Y mensalidade, a escola se sustenta? Quantas professoras, salas e quanto sobra?</p>
+
+            <form id="form-escola" action="javascript:void(0)" method="post" novalidate onsubmit="return false">
+                <p class="secao-title">Alunos e receita</p>
+                <div class="row">
+                    <div class="field">
+                        <label for="alunos">Quantidade de alunos</label>
+                        <input type="number" id="alunos" name="alunos" value="50" min="1" step="1" required>
+                    </div>
+                    <div class="field">
+                        <label for="mensalidade">Mensalidade</label>
+                        <input type="text" id="mensalidade" name="mensalidade" class="input-moeda" value="R$ 700,00" required>
+                    </div>
+                </div>
+
+                <p class="secao-title">Modelo pedagógico</p>
+                <div class="row">
+                    <div class="field">
+                        <label for="alunosTurma">Alunos por turma</label>
+                        <input type="number" id="alunosTurma" name="alunosTurma" value="8" min="1" step="1" required>
+                    </div>
+                    <div class="field">
+                        <label for="aulasSemana">Aulas por aluno / semana</label>
+                        <input type="text" id="aulasSemana" name="aulasSemana" value="2" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="field">
+                        <label for="duracaoAula">Duração da aula (horas)</label>
+                        <input type="text" id="duracaoAula" name="duracaoAula" value="1,5" required>
+                    </div>
+                    <div class="field">
+                        <label for="horasProfessor">Horas/semana por professora</label>
+                        <input type="number" id="horasProfessor" name="horasProfessor" value="30" min="1" step="1" required>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Turnos de funcionamento</label>
+                    <div class="check-row">
+                        <label><input type="checkbox" id="turnoManha" name="turnoManha" checked> Manhã</label>
+                        <label><input type="checkbox" id="turnoTarde" name="turnoTarde" checked> Tarde</label>
+                        <label><input type="checkbox" id="turnoNoite" name="turnoNoite" checked> Noite</label>
+                    </div>
+                    <p class="field-hint">Ou informe horários simultâneos por dia (se nenhum turno marcado):</p>
+                    <input type="number" id="horariosDia" name="horariosDia" placeholder="4" min="1" step="1" style="margin-top:6px">
+                </div>
+
+                <p class="secao-title">Custos mensais</p>
+                <div class="row">
+                    <div class="field">
+                        <label for="salarioProf">Salário professora</label>
+                        <input type="text" id="salarioProf" name="salarioProf" class="input-moeda" value="R$ 2.500,00" required>
+                    </div>
+                    <div class="field">
+                        <label for="salarioRecepcao">Recepção (1)</label>
+                        <input type="text" id="salarioRecepcao" name="salarioRecepcao" class="input-moeda" value="R$ 1.800,00">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="field">
+                        <label for="custoLimpeza">Limpeza</label>
+                        <input type="text" id="custoLimpeza" name="custoLimpeza" class="input-moeda" value="R$ 800,00">
+                    </div>
+                    <div class="field">
+                        <label for="outrosCustos">Outros custos fixos</label>
+                        <input type="text" id="outrosCustos" name="outrosCustos" class="input-moeda" placeholder="R$ 0,00" value="R$ 0,00">
+                    </div>
+                </div>
+                <div class="check-row">
+                    <label><input type="checkbox" id="incluirRecepcao" name="incluirRecepcao" checked> Incluir recepcionista</label>
+                    <label><input type="checkbox" id="incluirLimpeza" name="incluirLimpeza" checked> Incluir limpeza</label>
+                </div>
+
+                <button type="button" id="btn-calcular-escola" class="btn-primary">Analisar capacidade</button>
+            </form>
+
+            <div class="result" id="resultado-escola">
+                <div class="semaforo">
+                    <div class="bola" id="esc_bola"></div>
+                    <span class="rotulo" id="esc_rotulo"></span>
+                </div>
+                <p class="destaque" id="esc_diag"></p>
+
+                <p class="secao-title">Capacidade operacional</p>
+                <div class="linha"><span class="rot">Turmas</span><span class="val" id="esc_turmas"></span></div>
+                <div class="linha"><span class="rot">Horas de aula / semana</span><span class="val" id="esc_horas"></span></div>
+                <div class="linha"><span class="rot">Professoras</span><span class="val" id="esc_prof"></span></div>
+                <div class="linha"><span class="rot">Salas simultâneas</span><span class="val" id="esc_salas"></span></div>
+                <div class="linha"><span class="rot">Recepcionistas</span><span class="val" id="esc_recep"></span></div>
+                <div class="linha"><span class="rot">Equipe limpeza</span><span class="val" id="esc_limpeza"></span></div>
+
+                <p class="secao-title">Estrutura física (estimativa)</p>
+                <div class="linha"><span class="rot">Cadeiras</span><span class="val" id="esc_cadeiras"></span></div>
+                <div class="linha"><span class="rot">Mesas</span><span class="val" id="esc_mesas"></span></div>
+                <div class="linha"><span class="rot">Quadros</span><span class="val" id="esc_quadros"></span></div>
+                <div class="linha"><span class="rot">Ar-condicionado</span><span class="val" id="esc_ac"></span></div>
+
+                <p class="secao-title">Financeiro</p>
+                <div class="linha"><span class="rot">Faturamento</span><span class="val" id="esc_fat"></span></div>
+                <div class="linha"><span class="rot">Custos estimados</span><span class="val" id="esc_custos"></span></div>
+                <div class="linha"><span class="rot">Lucro previsto</span><span class="val" id="esc_lucro"></span></div>
+                <div class="linha" style="border-bottom:none"><span class="rot">Custos / faturamento</span><span class="val" id="esc_folha"></span></div>
+
+                <p class="secao-title">Qual meu próximo degrau?</p>
+                <ul class="degraus-list" id="esc_degraus"></ul>
+
+                <p class="cenarios-title">Simulador — 20 · 50 · 100 alunos</p>
+                <div class="cenarios-grid" id="esc_cenarios"></div>
+
+                <button type="button" class="btn-copiar" id="btn-copiar-escola">Copiar análise</button>
+            </div>
+
+            <div class="footer">Ferramenta de gestão — Picos do Saber. Ajuste premissas ao seu plano diretor.</div>
+        </div>
     </div>
 
     <script>
       (function () {
-        var f = document.getElementById('form-roi');
-        if (!f) return;
-        f.addEventListener('submit', function (e) { e.preventDefault(); return false; });
-        f.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault();
+        document.querySelectorAll('.tab').forEach(function (tab) {
+          tab.addEventListener('click', function () {
+            var id = tab.getAttribute('data-tab');
+            document.querySelectorAll('.tab').forEach(function (t) {
+              t.classList.toggle('active', t === tab);
+              t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+            });
+            document.querySelectorAll('.panel').forEach(function (p) {
+              var on = p.id === 'panel-' + id;
+              p.classList.toggle('active', on);
+              p.hidden = !on;
+            });
+          });
+        });
+        ['form-roi', 'form-escola'].forEach(function (fid) {
+          var f = document.getElementById(fid);
+          if (!f) return;
+          f.addEventListener('submit', function (e) { e.preventDefault(); return false; });
         });
       })();
     </script>
-    <script src="calc-engine.js?v=4"></script>
-    <script src="app.js?v=4"></script>
+    <script src="calc-engine.js?v=5"></script>
+    <script src="escola-engine.js?v=5"></script>
+    <script src="app.js?v=5"></script>
+    <script src="escola-app.js?v=5"></script>
 </body>
 </html>

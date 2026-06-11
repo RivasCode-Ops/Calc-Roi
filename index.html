@@ -28,15 +28,42 @@
         .tabs { display: flex; gap: 8px; margin-bottom: 24px; }
         .tab {
             flex: 1;
-            padding: 10px 12px;
+            padding: 10px 8px;
             border: 1px solid #2a2a30;
             border-radius: 10px;
             background: transparent;
             color: #888;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
             cursor: pointer;
             transition: all .2s;
+        }
+        .plano-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .plano-card {
+            border: 1px solid #2a2a30;
+            border-radius: 12px;
+            padding: 14px;
+            background: #121214;
+        }
+        .plano-card.destaque { border-color: #00c853; background: rgba(0,200,83,.06); }
+        .plano-card.premium { border-color: #448aff; background: rgba(68,138,255,.06); }
+        .plano-nome { font-size: 12px; font-weight: 700; color: #a0a0b0; margin-bottom: 6px; }
+        .plano-valor { font-size: 20px; font-weight: 700; color: #fff; }
+        .plano-sub { font-size: 11px; color: #666; margin-top: 4px; }
+        .aviso-piso {
+            font-size: 12px;
+            color: #ffb300;
+            background: rgba(255,179,0,.08);
+            border: 1px solid rgba(255,179,0,.25);
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin: 12px 0;
+            line-height: 1.5;
         }
         .tab:hover { border-color: #444; color: #ccc; }
         .tab.active { border-color: #00c853; color: #00c853; background: rgba(0,200,83,.08); }
@@ -246,6 +273,7 @@
         .cenario-card.verde { border-color: rgba(0,200,83,.3); }
         .cenario-card.amarelo { border-color: rgba(245,166,35,.3); }
         .cenario-card.vermelho { border-color: rgba(229,57,53,.3); }
+        .cenario-card.atual { outline: 2px solid rgba(0,200,83,.45); outline-offset: 1px; }
         .cenario-head { display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px; }
         .cenario-nome { font-size: 10px; text-transform: uppercase; color: #888; }
         .cenario-veredito { font-size: 11px; font-weight: 600; color: #ccc; }
@@ -293,6 +321,7 @@
             h1 { font-size: 22px; }
             .row { flex-direction: column; gap: 0; }
             .cenarios-grid { grid-template-columns: 1fr; }
+            .plano-grid { grid-template-columns: 1fr; }
             .comparativo { grid-template-columns: 1fr; }
         }
     </style>
@@ -301,7 +330,8 @@
     <div class="card">
         <div class="tabs" role="tablist">
             <button type="button" class="tab active" data-tab="roi" role="tab" aria-selected="true">ROI Negócios</button>
-            <button type="button" class="tab" data-tab="escola" role="tab" aria-selected="false">Picos do Saber</button>
+            <button type="button" class="tab" data-tab="escola" role="tab" aria-selected="false">Capacidade</button>
+            <button type="button" class="tab" data-tab="preco" role="tab" aria-selected="false">Preços</button>
         </div>
 
         <div id="panel-roi" class="panel active" role="tabpanel">
@@ -508,20 +538,126 @@
 
                 <p class="secao-title">Financeiro</p>
                 <div class="linha"><span class="rot">Faturamento</span><span class="val" id="esc_fat"></span></div>
-                <div class="linha"><span class="rot">Custos estimados</span><span class="val" id="esc_custos"></span></div>
+                <div class="linha"><span class="rot">Custos — professoras</span><span class="val" id="esc_custos_prof"></span></div>
+                <div class="linha"><span class="rot">Custos — fixos</span><span class="val" id="esc_custos_fixos"></span></div>
+                <div class="linha"><span class="rot">Custos totais</span><span class="val" id="esc_custos"></span></div>
                 <div class="linha"><span class="rot">Lucro previsto</span><span class="val" id="esc_lucro"></span></div>
+                <div class="linha"><span class="rot">Mensalidade mínima (equilíbrio)</span><span class="val" id="esc_mensal_min"></span></div>
                 <div class="linha" style="border-bottom:none"><span class="rot">Custos / faturamento</span><span class="val" id="esc_folha"></span></div>
 
                 <p class="secao-title">Qual meu próximo degrau?</p>
                 <ul class="degraus-list" id="esc_degraus"></ul>
 
-                <p class="cenarios-title">Simulador — 20 · 50 · 100 alunos</p>
+                <p class="cenarios-title">Simulador de cenários (inclui seu volume)</p>
                 <div class="cenarios-grid" id="esc_cenarios"></div>
 
                 <button type="button" class="btn-copiar" id="btn-copiar-escola">Copiar análise</button>
             </div>
 
             <div class="footer">Ferramenta de gestão — Picos do Saber. Ajuste premissas ao seu plano diretor.</div>
+        </div>
+
+        <div id="panel-preco" class="panel" role="tabpanel" hidden>
+            <div class="badge">Picos do Saber · Precificação</div>
+            <h1>Preço por hora e planos comerciais</h1>
+            <p class="sub">O piso da hora da professora é referência — o preço final parte dos custos totais e direciona a família ao acompanhamento anual.</p>
+
+            <form id="form-preco" action="javascript:void(0)" method="post" novalidate onsubmit="return false">
+                <p class="secao-title">Base pedagógica</p>
+                <div class="row">
+                    <div class="field">
+                        <label for="alunosTotal">Total de alunos na escola</label>
+                        <input type="number" id="alunosTotal" name="alunosTotal" value="50" min="1" step="1" required>
+                    </div>
+                    <div class="field">
+                        <label for="alunosTurmaPreco">Alunos por turma</label>
+                        <input type="number" id="alunosTurmaPreco" name="alunosTurmaPreco" value="6" min="1" step="1" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="field">
+                        <label for="horasEncontro">Horas por encontro</label>
+                        <input type="text" id="horasEncontro" name="horasEncontro" value="1,5" required>
+                    </div>
+                    <div class="field">
+                        <label for="encontrosSemana">Encontros por semana</label>
+                        <input type="text" id="encontrosSemana" name="encontrosSemana" value="2" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="valorHora">Valor da hora da professora</label>
+                    <input type="text" id="valorHora" name="valorHora" class="input-moeda" value="R$ 80,00" required>
+                </div>
+
+                <p class="secao-title">Custos e margem</p>
+                <div class="field">
+                    <label for="custosFixosPreco">Custos fixos mensais (aluguel, coordenação, material, marketing…)</label>
+                    <input type="text" id="custosFixosPreco" name="custosFixosPreco" class="input-moeda" value="R$ 8.000,00" required>
+                </div>
+                <div class="row">
+                    <div class="field">
+                        <label for="margemLucro">Margem de lucro desejada (%)</label>
+                        <input type="text" id="margemLucro" name="margemLucro" value="20" required>
+                    </div>
+                    <div class="field">
+                        <label for="mensalidadeRef">Mensalidade de referência (opcional)</label>
+                        <input type="text" id="mensalidadeRef" name="mensalidadeRef" class="input-moeda" value="R$ 700,00" placeholder="R$ 700,00">
+                        <p class="field-hint">Ex.: Plano Evolução — para ver lucro nesse preço.</p>
+                    </div>
+                </div>
+
+                <button type="button" id="btn-calcular-preco" class="btn-primary">Calcular preços e planos</button>
+            </form>
+
+            <div class="result" id="resultado-preco">
+                <div class="semaforo">
+                    <div class="bola" id="pre_bola"></div>
+                    <span class="rotulo" id="pre_rotulo"></span>
+                </div>
+                <p class="destaque" id="pre_diag"></p>
+
+                <p class="secao-title">Bloco 1 — Piso (só hora da professora)</p>
+                <div class="aviso-piso">Referência de custo mínimo. Não use como preço final — ignora aluguel, coordenação, lucro e demais fixos.</div>
+                <div class="linha"><span class="rot">Custo por encontro (turma)</span><span class="val" id="pre_custo_encontro"></span></div>
+                <div class="linha"><span class="rot">Piso por aula / aluno</span><span class="val" id="pre_piso_aula"></span></div>
+                <div class="linha"><span class="rot">Piso mensal / aluno</span><span class="val" id="pre_piso_mes"></span></div>
+                <div class="linha" style="border-bottom:none"><span class="rot">Gap piso → custo real</span><span class="val" id="pre_gap"></span></div>
+
+                <p class="secao-title">Bloco 2 — Custo real e preço mínimo</p>
+                <div class="linha"><span class="rot">Custo professoras / mês</span><span class="val" id="pre_custo_prof"></span></div>
+                <div class="linha"><span class="rot">Custo real por aluno</span><span class="val" id="pre_custo_real"></span></div>
+                <div class="linha"><span class="rot">Preço mínimo recomendado</span><span class="val" id="pre_minimo"></span></div>
+                <div class="linha" id="pre_ref_row" style="border-bottom:none"><span class="rot">Lucro na mensalidade de referência</span><span class="val" id="pre_ref_lucro"></span></div>
+                <div class="linha" style="border-bottom:none"><span class="rot">Margem no plano sugerido</span><span class="val" id="pre_margem"></span></div>
+
+                <p class="secao-title">Planos comerciais</p>
+                <div class="plano-grid">
+                    <div class="plano-card destaque">
+                        <div class="plano-nome">🟢 Plano Evolução — Anual 12×</div>
+                        <div class="plano-valor" id="pre_plano_12"></div>
+                        <div class="plano-sub">Acompanhamento contínuo · vaga garantida</div>
+                    </div>
+                    <div class="plano-card destaque">
+                        <div class="plano-nome">🟡 Anual antecipado (−10%)</div>
+                        <div class="plano-valor" id="pre_plano_vista"></div>
+                        <div class="plano-sub" id="pre_plano_vista_det"></div>
+                    </div>
+                    <div class="plano-card premium">
+                        <div class="plano-nome">🔵 Hora avulsa — recuperação</div>
+                        <div class="plano-valor" id="pre_hora_rec"></div>
+                        <div class="plano-sub">Intervenção premium (meio do ano)</div>
+                    </div>
+                    <div class="plano-card premium">
+                        <div class="plano-nome">🔵 Pacotes intensivos</div>
+                        <div class="plano-valor" id="pre_pacote_10"></div>
+                        <div class="plano-sub" id="pre_pacote_20"></div>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-copiar" id="btn-copiar-preco">Copiar análise</button>
+            </div>
+
+            <div class="footer">Capacidade → custos → alunos → preço mínimo → planos. Ferramenta interna Picos do Saber.</div>
         </div>
     </div>
 
@@ -541,16 +677,18 @@
             });
           });
         });
-        ['form-roi', 'form-escola'].forEach(function (fid) {
+        ['form-roi', 'form-escola', 'form-preco'].forEach(function (fid) {
           var f = document.getElementById(fid);
           if (!f) return;
           f.addEventListener('submit', function (e) { e.preventDefault(); return false; });
         });
       })();
     </script>
-    <script src="calc-engine.js?v=5"></script>
-    <script src="escola-engine.js?v=5"></script>
-    <script src="app.js?v=5"></script>
-    <script src="escola-app.js?v=5"></script>
+    <script src="calc-engine.js?v=7"></script>
+    <script src="escola-engine.js?v=7"></script>
+    <script src="preco-engine.js?v=7"></script>
+    <script src="app.js?v=7"></script>
+    <script src="escola-app.js?v=7"></script>
+    <script src="preco-app.js?v=7"></script>
 </body>
 </html>

@@ -7,7 +7,7 @@
     validarEntradaEscola,
     calcularEscola,
     proximosDegraus,
-    simularCenarios,
+    montarCenarios,
     textoAnaliseEscola,
   } = window.EscolaEngine;
 
@@ -16,7 +16,6 @@
   if (!form || !resultado) return;
 
   let ultimoPacote = null;
-  const CENARIOS_PADRAO = [20, 50, 100];
 
   document.querySelectorAll('#panel-escola .input-moeda').forEach((el) => {
     el.addEventListener('input', () => aplicarMascaraMoeda(el));
@@ -32,16 +31,21 @@
     document.getElementById('esc_diag').textContent = r.diagnostico;
 
     document.getElementById('esc_turmas').textContent = r.turmas + ' grupos';
-    document.getElementById('esc_horas').textContent = r.horasSemanais.toFixed(1) + ' h/semana';
+    document.getElementById('esc_horas').textContent =
+      r.horasCargaTotal.toFixed(1) + ' h total (' + r.horasPorAluno.toFixed(1) + ' h/aluno)';
     document.getElementById('esc_prof').textContent = String(r.professoras);
     document.getElementById('esc_salas').textContent = String(r.salas);
     document.getElementById('esc_recep').textContent = String(r.recepcionistas);
     document.getElementById('esc_limpeza').textContent = String(r.equipeLimpeza);
 
     document.getElementById('esc_fat').textContent = fmtMoeda(r.faturamento);
+    document.getElementById('esc_custos_prof').textContent = fmtMoeda(r.custoProfessoras);
+    document.getElementById('esc_custos_fixos').textContent = fmtMoeda(r.custosFixos);
     document.getElementById('esc_custos').textContent = fmtMoeda(r.custosTotal);
-    document.getElementById('esc_lucro').textContent = fmtMoeda(r.lucro);
+    document.getElementById('esc_lucro').textContent =
+      fmtMoeda(r.lucro) + ' (' + r.margemPct.toFixed(1) + '%)';
     document.getElementById('esc_folha').textContent = r.folhaPct.toFixed(1) + '% do faturamento';
+    document.getElementById('esc_mensal_min').textContent = fmtMoeda(r.mensalidadeMinima) + '/aluno';
 
     document.getElementById('esc_cadeiras').textContent = String(r.estrutura.cadeiras);
     document.getElementById('esc_mesas').textContent = String(r.estrutura.mesas);
@@ -53,9 +57,9 @@
     document.getElementById('esc_cenarios').innerHTML = cenarios
       .map(
         (c) => `
-      <div class="cenario-card ${c.semaforo}">
+      <div class="cenario-card ${c.semaforo}${c.atual ? ' atual' : ''}" aria-label="${c.alunos} alunos">
         <div class="cenario-head">
-          <span class="cenario-nome">${c.alunos} alunos</span>
+          <span class="cenario-nome">${c.alunos} alunos${c.atual ? ' · seu cenário' : ''}</span>
           <span class="cenario-veredito">${c.veredito}</span>
         </div>
         <div class="cenario-lucro">${fmtMoeda(c.lucro)}</div>
@@ -92,7 +96,7 @@
 
       const r = calcularEscola(entrada);
       const alertas = proximosDegraus(entrada, r);
-      const cenarios = simularCenarios(entrada, CENARIOS_PADRAO);
+      const cenarios = montarCenarios(entrada);
       ultimoPacote = { entrada, r, alertas, cenarios };
       renderResultado(entrada, r, alertas, cenarios);
     } catch (err) {
@@ -123,5 +127,9 @@
         btn.textContent = 'Copiar análise';
       }, 2000);
     });
+  });
+
+  document.querySelector('[data-tab="escola"]')?.addEventListener('click', () => {
+    if (resultado.style.display !== 'block') calcular();
   });
 })();

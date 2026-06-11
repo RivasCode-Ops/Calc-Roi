@@ -34,8 +34,10 @@ function validarEntradaEscola(e) {
 
 function calcularEscola(entrada) {
   const turmas = Math.ceil(entrada.numAlunos / entrada.alunosPorTurma);
-  const horasSemanais = entrada.numAlunos * entrada.aulasPorSemana * entrada.duracaoAulaHoras;
-  const professoras = Math.max(1, Math.ceil(horasSemanais / entrada.horasProfessorSemana));
+  // Horas-aula entregues (alunos × carga individual) — modelo conservador para folha docente
+  const horasCargaTotal = entrada.numAlunos * entrada.aulasPorSemana * entrada.duracaoAulaHoras;
+  const horasPorAluno = entrada.aulasPorSemana * entrada.duracaoAulaHoras;
+  const professoras = Math.max(1, Math.ceil(horasCargaTotal / entrada.horasProfessorSemana));
   const salas = Math.max(1, Math.ceil(turmas / entrada.turnosAtivos));
 
   const faturamento = entrada.numAlunos * entrada.mensalidade;
@@ -46,6 +48,9 @@ function calcularEscola(entrada) {
   const custosTotal = custoProfessoras + custosFixos;
   const lucro = faturamento - custosTotal;
   const folhaPct = faturamento > 0 ? (custosTotal / faturamento) * 100 : 100;
+  const margemPct = faturamento > 0 ? (lucro / faturamento) * 100 : -100;
+  const mensalidadeMinima =
+    entrada.numAlunos > 0 ? Math.ceil((custosTotal / entrada.numAlunos) * 100) / 100 : 0;
 
   let veredito;
   let semaforo;
@@ -53,21 +58,34 @@ function calcularEscola(entrada) {
   if (lucro <= 0) {
     veredito = 'Risco';
     semaforo = 'vermelho';
-    diagnostico = 'A mensalidade não sustenta a equipe neste cenário. Reveja preço, alunos ou custos.';
-  } else if (folhaPct > 40) {
+    diagnostico =
+      'A mensalidade não sustenta a equipe. Mínimo sugerido: ' +
+      window.CalcEngine.fmtMoeda(mensalidadeMinima) +
+      '/aluno com ' +
+      entrada.numAlunos +
+      ' alunos.';
+  } else if (folhaPct > 40 || margemPct < 12) {
     veredito = 'Atenção';
     semaforo = 'amarelo';
     diagnostico =
-      'Folha e custos fixos estão acima de 40% do faturamento. Monitore contratações e reajustes.';
+      'Operação positiva, mas margem apertada (' +
+      margemPct.toFixed(1) +
+      '%). Custos consomem ' +
+      folhaPct.toFixed(1) +
+      '% do faturamento — cuidado ao contratar.';
   } else {
     veredito = 'Saudável';
     semaforo = 'verde';
-    diagnostico = 'A operação se sustenta com margem confortável para o volume atual.';
+    diagnostico =
+      'Estrutura sustentável com margem de ' +
+      margemPct.toFixed(1) +
+      '%. Bom espaço para reinvestir ou formar reserva.';
   }
 
   return {
     turmas,
-    horasSemanais,
+    horasCargaTotal,
+    horasPorAluno,
     professoras,
     salas,
     recepcionistas: entrada.incluirRecepcao ? 1 : 0,
@@ -78,6 +96,8 @@ function calcularEscola(entrada) {
     custosTotal,
     lucro,
     folhaPct,
+    margemPct,
+    mensalidadeMinima,
     veredito,
     semaforo,
     diagnostico,
@@ -90,12 +110,34 @@ function calcularEscola(entrada) {
   };
 }
 
+function calcularAlunosEquilibrio(entrada, maxBusca = 300) {
+  for (let n = 1; n <= maxBusca; n++) {
+    const r = calcularEscola({ ...entrada, numAlunos: n });
+    if (r.lucro >= 0) return { alunos: n, resultado: r };
+  }
+  return null;
+}
+
 function proximosDegraus(entrada, atual) {
   const alertas = [];
+  const fmt = window.CalcEngine.fmtMoeda;
+
+  alertas.push(
+    'Agora (' +
+      entrada.numAlunos +
+      ' alunos): ' +
+      atual.professoras +
+      ' professoras · ' +
+      atual.salas +
+      ' sala(s) · lucro ' +
+      fmt(atual.lucro)
+  );
+
   let proxProf = null;
   let proxSala = null;
+  const limite = Math.max(entrada.numAlunos + 80, 100);
 
-  for (let n = entrada.numAlunos + 1; n <= entrada.numAlunos + 80; n++) {
+  for (let n = entrada.numAlunos + 1; n <= limite; n++) {
     const r = calcularEscola({ ...entrada, numAlunos: n });
     if (!proxProf && r.professoras > atual.professoras) {
       proxProf = { alunos: n, professoras: r.professoras };
@@ -106,29 +148,42 @@ function proximosDegraus(entrada, atual) {
     if (proxProf && proxSala) break;
   }
 
-  if (atual.professoras === 1) {
-    alertas.push('Continue com 1 professora e ' + atual.salas + ' sala(s) até crescer.');
-  }
   if (proxProf) {
     alertas.push(
-      'Atenção: com ' + proxProf.alunos + ' alunos, planeje ' + proxProf.professoras + ' professoras.'
+      'Contratação: aos ' + proxProf.alunos + ' alunos → ' + proxProf.professoras + ' professoras.'
     );
+  } else {
+    alertas.push('Professoras: sem necessidade de nova contratação no curto prazo.');
   }
+
   if (proxSala) {
     alertas.push(
-      'Estrutura: com ' + proxSala.alunos + ' alunos, planeje ' + proxSala.salas + ' salas simultâneas.'
+      'Espaço: aos ' + proxSala.alunos + ' alunos → ' + proxSala.salas + ' salas simultâneas.'
     );
+  } else {
+    alertas.push('Salas: capacidade física OK para crescer sem nova sala.');
   }
-  if (!proxProf && !proxSala && entrada.numAlunos >= 45) {
-    alertas.push('Volume alto — revise equipe, salas e precificação com frequência.');
+
+  const equilibrio = calcularAlunosEquilibrio(entrada);
+  if (equilibrio && entrada.numAlunos < equilibrio.alunos) {
+    alertas.push(
+      'Financeiro: ponto de equilíbrio estimado em ' + equilibrio.alunos + ' alunos (lucro ≥ 0).'
+    );
   }
 
   return alertas;
 }
 
+function montarCenarios(entrada) {
+  const base = [20, 50, 100, entrada.numAlunos];
+  const unicos = [...new Set(base)].sort((a, b) => a - b);
+  return simularCenarios(entrada, unicos);
+}
+
 function simularCenarios(entrada, volumes) {
   return volumes.map((n) => ({
     alunos: n,
+    atual: n === entrada.numAlunos,
     ...calcularEscola({ ...entrada, numAlunos: n }),
   }));
 }
@@ -140,17 +195,20 @@ function textoAnaliseEscola(entrada, r, alertas, cenarios) {
     '',
     'ALUNOS: ' + entrada.numAlunos,
     'MENSALIDADE: ' + fmt(entrada.mensalidade),
+    'MENSALIDADE MÍNIMA (equilíbrio): ' + fmt(r.mensalidadeMinima),
     '',
     'CAPACIDADE',
     'Turmas: ' + r.turmas,
-    'Horas/semana: ' + r.horasSemanais.toFixed(1) + 'h',
+    'Carga horária total: ' + r.horasCargaTotal.toFixed(1) + ' h/sem',
+    'Horas por aluno: ' + r.horasPorAluno.toFixed(1) + ' h/sem',
     'Professoras: ' + r.professoras,
     'Salas: ' + r.salas,
     '',
     'FINANCEIRO',
     'Faturamento: ' + fmt(r.faturamento),
-    'Custos: ' + fmt(r.custosTotal),
-    'Lucro: ' + fmt(r.lucro),
+    'Custos professoras: ' + fmt(r.custoProfessoras),
+    'Custos fixos: ' + fmt(r.custosFixos),
+    'Lucro: ' + fmt(r.lucro) + ' (' + r.margemPct.toFixed(1) + '%)',
     'Veredito: ' + r.veredito,
     '',
     'PRÓXIMOS DEGRAUS:',
@@ -166,7 +224,9 @@ window.EscolaEngine = {
   lerEntradaEscola,
   validarEntradaEscola,
   calcularEscola,
+  calcularAlunosEquilibrio,
   proximosDegraus,
+  montarCenarios,
   simularCenarios,
   textoAnaliseEscola,
 };

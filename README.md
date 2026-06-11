@@ -1,58 +1,62 @@
-# Raio-X de Negócios (Calc-Roi)
+# Raio-X de Negócios + Gestão Escolar (Calc-Roi)
 
-Calculadora de **ROI aplicado a negócios**: compare lucro mensal, payback e cenários com o rendimento da renda fixa.
+Calculadora de **ROI para negócios** e **sistema de inteligência de gestão escolar** (Picos do Saber).
 
 **Live:** https://rivascode-ops.github.io/Calc-Roi
 
-## O que calcula
+## Produtos
 
-| Métrica | Descrição |
-|---------|-----------|
-| Lucro mensal | Faturamento − custos − pró-labore − depreciação |
-| ROI mensal | Lucro ÷ investimento |
-| Payback | Meses para recuperar o CAPEX |
-| Custo de oportunidade | vs. renda fixa (% a.a.) |
-| Cenários | Pessimista (−25% clientes), base, otimista (+25%) |
+### ROI Negócios
+Compare lucro mensal, payback e cenários com o rendimento da renda fixa.
 
-Veredito: **Atrativo** · **Atenção** · **Melhor deixar aplicado** · **Prejuízo**
+### Picos do Saber — Gestão Escolar
+Cadastre **uma vez** no **Painel Mestre**; todos os módulos calculam automaticamente:
+
+| Módulo | Entrega |
+|--------|---------|
+| Viabilidade | Receita, custos, lucro, margem, semáforo |
+| Capacidade | Turmas, salas, professoras, carga horária |
+| Preço ideal | Custo real/aluno, planos com semáforo |
+| ROI | Payback, ROI anual, gráfico acumulado |
+| Cenários | Tabela + gráfico 10 / 30 / 50 alunos |
+| Equilíbrio | Break-even + slider “e se a mensalidade for…” |
+
+**Recursos v9:** dados salvos no navegador (`localStorage`), resumo executivo, gráficos Chart.js, export PDF.
 
 ## Como usar (web)
 
-1. Abra `index.html` ou o GitHub Pages
-2. Preencha investimento, clientes, ticket, custos e taxa de renda fixa
-3. *(Opcional)* Pró-labore, equipamentos e vida útil
-4. Veja resultado base + 3 cenários
-
-## Como usar (CLI Python)
-
-```bash
-cd 02_APPS/Calc-Roi
-python calc_roi.py
-```
+1. Abra `index.html`, `SERVIR.bat` ou GitHub Pages
+2. Aba **Picos do Saber** → preencha o **Painel Mestre**
+3. Navegue pelos módulos — os dados persistem ao recarregar a página
+4. **Copiar análise** ou **Baixar PDF** para apresentar ao sócio/contador
 
 ## Testes
 
 ```bash
-python -m pytest test_calc_engine.py -q
+python -m pytest test_calc_engine.py test_gestao_engine.py -q
 ```
 
 ## Estrutura
 
 | Arquivo | Função |
 |---------|--------|
-| `index.html` | UI V2 |
-| `calc-engine.js` | Motor (browser) |
-| `app.js` | DOM e interação |
-| `calc_engine.py` | Motor (Python) |
-| `calc_roi.py` | CLI interativo |
-| `test_calc_engine.py` | Testes unitários |
+| `index.html` | UI (ROI + Gestão) |
+| `calc-engine.js` / `app.js` | Motor e UI ROI |
+| `gestao-engine.js` | Motor central Picos |
+| `gestao-app.js` | UI Painel Mestre + módulos |
+| `gestao-storage.js` | Persistência localStorage |
+| `gestao-charts.js` | Gráficos Chart.js |
+| `gestao-export.js` | Exportação PDF |
+| `test_gestao_engine.py` | Testes gestão escolar |
 
 ## Roadmap
 
-- [x] V1 — 5 campos, veredito instantâneo
-- [x] V2 — Depreciação, pró-labore, cenários, motor unificado
-- [ ] V3 — VPL, TIR, relatório PDF
+- [x] V1 — ROI básico
+- [x] V2 — Cenários, depreciação, comparativo renda fixa
+- [x] V3 Gestão — Painel Mestre ERP, 6 módulos automáticos
+- [x] V9 — localStorage, gráficos, PDF, resumo executivo
+- [ ] V10 — VPL, TIR, cenários salvos nomeados
 
 ## Stack
 
-HTML + CSS + JavaScript (ES modules) · Python 3 · zero build step · funciona offline
+HTML + CSS + JavaScript vanilla · Chart.js + jsPDF (CDN) · Python 3 · zero build · GitHub Pages

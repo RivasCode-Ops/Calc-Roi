@@ -99,6 +99,28 @@
             line-height: 1.6;
         }
         .modulo-result { margin-top: 8px; }
+        .resumo-exec {
+            font-size: 12px;
+            line-height: 1.5;
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            border: 1px solid #2a2a30;
+            background: #121214;
+            color: #a0a0b0;
+        }
+        .resumo-exec.verde { border-color: rgba(0,200,83,.35); background: rgba(0,200,83,.06); }
+        .resumo-exec.amarelo { border-color: rgba(255,179,0,.35); background: rgba(255,179,0,.06); }
+        .resumo-exec.vermelho { border-color: rgba(255,82,82,.35); background: rgba(255,82,82,.06); }
+        .chart-box { height: 260px; margin: 16px 0; position: relative; }
+        .slider-row { margin: 16px 0; }
+        .slider-row input[type="range"] { width: 100%; margin-top: 8px; accent-color: #448aff; }
+        .slider-val { color: #00c853; font-weight: 700; }
+        .acoes-gestao { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+        .acoes-gestao .btn-copiar { flex: 1; margin-top: 0; min-width: 140px; }
+        .btn-sec { flex: 1; min-width: 140px; padding: 12px; border-radius: 10px; border: 1px solid #2a2a30; background: transparent; color: #a0a0b0; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .btn-sec:hover { border-color: #448aff; color: #448aff; }
+        .storage-hint { font-size: 11px; color: #555; margin-top: 8px; }
         .tab:hover { border-color: #444; color: #ccc; }
         .tab.active { border-color: #00c853; color: #00c853; background: rgba(0,200,83,.08); }
         .panel { display: none; }
@@ -469,9 +491,13 @@
         </div>
 
         <div id="panel-gestao" class="panel" role="tabpanel" hidden>
-            <div class="badge">Picos do Saber · Sistema de Gestão</div>
+            <div class="badge">Picos do Saber · Gestão Escolar v9</div>
             <h1>Inteligência de gestão escolar</h1>
             <p class="sub">Cadastre uma vez no Painel Mestre — viabilidade, capacidade, preços, ROI, cenários e equilíbrio calculam automaticamente.</p>
+
+            <div id="gestao-resumo" class="resumo-exec" hidden>
+                <strong>Resumo:</strong> <span id="resumo_linha"></span>
+            </div>
 
             <div class="sub-tabs" role="tablist">
                 <button type="button" class="sub-tab active" data-subtab="mestre" aria-selected="true">Painel Mestre</button>
@@ -575,7 +601,9 @@
                 <div class="field"><label for="meta_prolabore">Pró-labore dos sócios (mensal)</label><input type="text" id="meta_prolabore" name="meta_prolabore" class="input-moeda"></div>
                 <div class="linha total-row" style="border:none;padding:12px 0"><span class="rot">Custos mensais totais (folha + fixos + pró-labore)</span><span class="val" id="tot_custos_mes">R$ 0,00</span></div>
 
+                <p class="storage-hint" id="storage_hint">Seus dados são salvos automaticamente neste navegador.</p>
                 <button type="button" id="btn-calcular-gestao" class="btn-primary">Atualizar todos os módulos</button>
+                <button type="button" id="btn-limpar-storage" class="btn-sec" style="width:100%;margin-top:8px">Restaurar valores padrão</button>
             </div>
             </form>
 
@@ -628,10 +656,12 @@
                     <div class="linha"><span class="rot">Payback</span><span class="val" id="roi_payback"></span></div>
                     <div class="linha" style="border-bottom:none"><span class="rot">ROI anual</span><span class="val" id="roi_anual"></span></div>
                 </div>
+                <div class="chart-box"><canvas id="chart_roi" aria-label="Gráfico de retorno acumulado"></canvas></div>
             </div>
 
             <div id="sub-cenarios" class="sub-panel modulo-result" hidden>
                 <p class="field-hint" id="cen_cap_max"></p>
+                <div class="chart-box"><canvas id="chart_cenarios" aria-label="Gráfico de cenários"></canvas></div>
                 <table class="tbl">
                     <thead id="cen_thead"></thead>
                     <tbody id="cen_tbody"></tbody>
@@ -639,6 +669,11 @@
             </div>
 
             <div id="sub-equilibrio" class="sub-panel modulo-result" hidden>
+                <div class="slider-row">
+                    <label for="eqb_slider">E se a mensalidade for: <span class="slider-val" id="eqb_slider_val">R$ 700,00</span></label>
+                    <input type="range" id="eqb_slider" min="350" max="1400" step="25" value="700">
+                    <p class="field-hint">Simule quantos alunos precisa para cobrir as contas com outro preço.</p>
+                </div>
                 <div class="result verde" style="display:block">
                     <div class="semaforo"><div class="bola" id="eqb_bola"></div><span class="rotulo" id="eqb_rotulo"></span></div>
                     <p class="destaque" id="eqb_diag"></p>
@@ -648,8 +683,11 @@
                 </div>
             </div>
 
-            <button type="button" class="btn-copiar" id="btn-copiar-gestao">Copiar análise completa</button>
-            <div class="footer">Painel Mestre → todos os módulos. Ferramenta interna Picos do Saber.</div>
+            <div class="acoes-gestao">
+                <button type="button" class="btn-copiar" id="btn-copiar-gestao">Copiar análise</button>
+                <button type="button" class="btn-sec" id="btn-pdf-gestao">Baixar PDF</button>
+            </div>
+            <div class="footer">Painel Mestre → todos os módulos · dados salvos no navegador. Ferramenta Picos do Saber.</div>
         </div>
     </div>
 
@@ -676,9 +714,14 @@
         });
       })();
     </script>
-    <script src="calc-engine.js?v=8"></script>
-    <script src="gestao-engine.js?v=8"></script>
-    <script src="app.js?v=8"></script>
-    <script src="gestao-app.js?v=8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+    <script src="calc-engine.js?v=9"></script>
+    <script src="gestao-engine.js?v=9"></script>
+    <script src="gestao-storage.js?v=9"></script>
+    <script src="gestao-charts.js?v=9"></script>
+    <script src="gestao-export.js?v=9"></script>
+    <script src="app.js?v=9"></script>
+    <script src="gestao-app.js?v=9"></script>
 </body>
 </html>

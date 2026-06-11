@@ -9,14 +9,21 @@
     validarMestre,
     totaisMestre,
     calcularGestao,
+    calcularEquilibrioComMensalidade,
+    projecaoRoiMensal,
+    resumoExecutivo,
     textoAnaliseGestao,
   } = window.GestaoEngine;
+  const storage = window.GestaoStorage;
+  const charts = window.GestaoCharts;
+  const exporter = window.GestaoExport;
 
   const form = document.getElementById('form-mestre');
   const panel = document.getElementById('panel-gestao');
   if (!form || !panel) return;
 
   let ultimoResultado = null;
+  let debounceSalvar = null;
   const iconeSemaforo = { verde: '🟢', amarelo: '🟡', vermelho: '🔴' };
 
   function setText(id, text) {
@@ -34,6 +41,16 @@
     });
   }
 
+  function agendarSalvar() {
+    if (!storage) return;
+    clearTimeout(debounceSalvar);
+    debounceSalvar = setTimeout(() => {
+      if (storage.salvarMestre(form)) {
+        setText('storage_hint', 'Dados salvos automaticamente neste navegador.');
+      }
+    }, 600);
+  }
+
   function atualizarTotaisMestre(m) {
     const t = totaisMestre(m);
     setText('tot_investimento', fmtMoeda(t.investimentoTotal));
@@ -46,6 +63,25 @@
       const total = row ? row.quantidade * row.salario : 0;
       setText('eq_' + c.id + '_t', fmtMoeda(total));
     });
+  }
+
+  function renderResumoExecutivo(m, r) {
+    const box = document.getElementById('gestao-resumo');
+    const s = resumoExecutivo(m, r);
+    if (!box) return;
+
+    const partes = [
+      s.alunos + ' alunos',
+      'Lucro ' + fmtMoeda(s.lucro) + '/mês',
+      s.margemPct.toFixed(1) + '% margem',
+    ];
+    if (s.payback) partes.push('Payback ' + s.payback.toFixed(1) + ' meses');
+    if (s.equilibrio) partes.push('Equilíbrio ' + s.equilibrio + ' alunos');
+    partes.push(iconeSemaforo[s.semaforo] + ' ' + s.veredito);
+
+    setText('resumo_linha', partes.join(' · '));
+    box.hidden = false;
+    box.className = 'resumo-exec ' + s.semaforo;
   }
 
   function renderSemaforo(prefix, saude, diag) {
@@ -147,6 +183,9 @@
           ? { veredito: 'Retorno moderado', semaforo: 'amarelo' }
           : { veredito: 'Sem retorno', semaforo: 'vermelho' };
     renderSemaforo('roi', saude, 'Investimento ÷ lucro mensal operacional.');
+    if (charts) {
+      charts.renderRoi(document.getElementById('chart_roi'), projecaoRoiMensal(roi, 24));
+    }
   }
 
   function renderCenarios(cenarios, capMax) {
@@ -180,42 +219,58 @@
       .join('');
 
     setText('cen_cap_max', 'Capacidade máxima cadastrada: ' + capMax + ' alunos');
+    if (charts) {
+      charts.renderCenarios(document.getElementById('chart_cenarios'), cenarios);
+    }
   }
 
-  function renderEquilibrio(eq, m, a) {
-    if (!eq) {
+  function renderEquilibrio(eq, m, a, mensalidadeSimulada) {
+    const mensal = mensalidadeSimulada ?? m.precos.mensalidadePadrao;
+    const eqSim =
+      mensalidadeSimulada != null
+        ? calcularEquilibrioComMensalidade(m, mensalidadeSimulada)
+        : eq;
+
+    if (!eqSim) {
       renderSemaforo('eqb', { veredito: 'Meta distante', semaforo: 'vermelho' }, '');
       setText('eqb_alunos', '—');
       setText('eqb_custos', fmtMoeda(a.custosTotal));
-      setText('eqb_mensal', fmtMoeda(m.precos.mensalidadePadrao));
+      setText('eqb_mensal', fmtMoeda(mensal));
       setText('eqb_diag', 'Aumente mensalidade ou reduza custos para viabilizar o ponto de equilíbrio.');
       return;
     }
+
     const saude =
-      m.capacidade.alunosAtuais >= eq.alunos
+      m.capacidade.alunosAtuais >= eqSim.alunos
         ? { veredito: 'Acima do equilíbrio', semaforo: 'verde' }
         : { veredito: 'Abaixo do equilíbrio', semaforo: 'amarelo' };
     renderSemaforo('eqb', saude, '');
-    setText('eqb_alunos', String(eq.alunos) + ' alunos');
-    setText('eqb_custos', fmtMoeda(eq.custosTotal));
-    setText('eqb_mensal', fmtMoeda(m.precos.mensalidadePadrao));
-    const falta = Math.max(0, eq.alunos - m.capacidade.alunosAtuais);
+    setText('eqb_alunos', String(eqSim.alunos) + ' alunos');
+    setText('eqb_custos', fmtMoeda(eqSim.custosTotal));
+    setText('eqb_mensal', fmtMoeda(mensal));
+    const falta = Math.max(0, eqSim.alunos - m.capacidade.alunosAtuais);
+    const simNota =
+      mensalidadeSimulada != null && mensalidadeSimulada !== m.precos.mensalidadePadrao
+        ? ' (simulação com ' + fmtMoeda(mensal) + ')'
+        : '';
     setText(
       'eqb_diag',
       falta > 0
-        ? 'Faltam ' + falta + ' alunos para cobrir todas as contas com a mensalidade atual.'
-        : 'Você já superou o ponto de equilíbrio — lucro operacional positivo.'
+        ? 'Faltam ' + falta + ' alunos para cobrir todas as contas' + simNota + '.'
+        : 'Você já superou o ponto de equilíbrio — lucro operacional positivo' + simNota + '.'
     );
   }
 
-  function renderModulo(subtab, m, r) {
+  function renderModulo(subtab, m, r, opts) {
     const a = r.atual;
     if (subtab === 'viabilidade') renderViabilidade(a);
     if (subtab === 'capacidade') renderCapacidade(m, a);
     if (subtab === 'preco') renderPreco(a, r.planos);
     if (subtab === 'roi') renderRoi(r.roi);
     if (subtab === 'cenarios') renderCenarios(r.cenarios, m.capacidade.capacidadeMaxima);
-    if (subtab === 'equilibrio') renderEquilibrio(r.equilibrio, m, a);
+    if (subtab === 'equilibrio') {
+      renderEquilibrio(r.equilibrio, m, a, opts?.mensalidadeSimulada);
+    }
   }
 
   function recalcular() {
@@ -227,14 +282,24 @@
 
       const mestre = lerMestre(form);
       atualizarTotaisMestre(mestre);
+      agendarSalvar();
 
       if (!validarMestre(mestre)) return;
 
       ultimoResultado = { mestre, resultado: calcularGestao(mestre) };
+      renderResumoExecutivo(mestre, ultimoResultado.resultado);
+
+      const slider = document.getElementById('eqb_slider');
+      const mensalSim = slider ? parseInt(slider.value, 10) : null;
 
       const subtabAtiva = panel.querySelector('.sub-tab.active');
       const id = subtabAtiva?.getAttribute('data-subtab');
-      if (id && id !== 'mestre') renderModulo(id, mestre, ultimoResultado.resultado);
+      if (id && id !== 'mestre') {
+        renderModulo(id, mestre, ultimoResultado.resultado, {
+          mensalidadeSimulada:
+            id === 'equilibrio' && mensalSim ? mensalSim : undefined,
+        });
+      }
     } catch (err) {
       console.error(err);
     }
@@ -254,7 +319,11 @@
           p.hidden = !on;
         });
         if (id !== 'mestre' && ultimoResultado) {
-          renderModulo(id, ultimoResultado.mestre, ultimoResultado.resultado);
+          const slider = document.getElementById('eqb_slider');
+          renderModulo(id, ultimoResultado.mestre, ultimoResultado.resultado, {
+            mensalidadeSimulada:
+              id === 'equilibrio' && slider ? parseInt(slider.value, 10) : undefined,
+          });
         }
       });
     });
@@ -326,11 +395,57 @@
     setMoeda('meta_prolabore', d.metas.prolaboreSocio);
   }
 
+  function initSliderEquilibrio() {
+    const slider = document.getElementById('eqb_slider');
+    if (!slider) return;
+
+    slider.addEventListener('input', () => {
+      const v = parseInt(slider.value, 10);
+      setText('eqb_slider_val', fmtMoeda(v));
+      if (ultimoResultado) {
+        renderEquilibrio(
+          ultimoResultado.resultado.equilibrio,
+          ultimoResultado.mestre,
+          ultimoResultado.resultado.atual,
+          v
+        );
+      }
+    });
+  }
+
+  function syncSliderComMensalidade() {
+    const slider = document.getElementById('eqb_slider');
+    const mestre = ultimoResultado?.mestre || lerMestre(form);
+    if (!slider || !mestre.precos.mensalidadePadrao) return;
+    const m = mestre.precos.mensalidadePadrao;
+    slider.min = Math.max(200, Math.floor(m * 0.5));
+    slider.max = Math.ceil(m * 2);
+    slider.step = 25;
+    slider.value = m;
+    setText('eqb_slider_val', fmtMoeda(m));
+  }
+
   aplicarMascaras();
   initSubTabs();
-  preencherDefaults();
+  initSliderEquilibrio();
 
-  form.addEventListener('input', recalcular);
+  let carregou = false;
+  if (storage) {
+    const payload = storage.carregarMestre(form);
+    if (payload) {
+      carregou = true;
+      setText(
+        'storage_hint',
+        'Dados restaurados de ' + storage.formatarDataSalva(payload.savedAt) + '.'
+      );
+    }
+  }
+  if (!carregou) preencherDefaults();
+
+  form.addEventListener('input', () => {
+    recalcular();
+    syncSliderComMensalidade();
+  });
   form.addEventListener('change', recalcular);
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -339,8 +454,8 @@
 
   document.getElementById('btn-calcular-gestao')?.addEventListener('click', () => {
     recalcular();
-    const first = panel.querySelector('.sub-tab[data-subtab="viabilidade"]');
-    first?.click();
+    syncSliderComMensalidade();
+    panel.querySelector('.sub-tab[data-subtab="viabilidade"]')?.click();
   });
 
   document.getElementById('btn-copiar-gestao')?.addEventListener('click', () => {
@@ -350,12 +465,32 @@
       const btn = document.getElementById('btn-copiar-gestao');
       btn.textContent = 'Copiado!';
       setTimeout(() => {
-        btn.textContent = 'Copiar análise completa';
+        btn.textContent = 'Copiar análise';
       }, 2000);
     });
+  });
+
+  document.getElementById('btn-pdf-gestao')?.addEventListener('click', () => {
+    if (!ultimoResultado || !exporter) return;
+    exporter.exportarPdfGestao(
+      ultimoResultado.mestre,
+      ultimoResultado.resultado,
+      fmtMoeda
+    );
+  });
+
+  document.getElementById('btn-limpar-storage')?.addEventListener('click', () => {
+    if (!storage) return;
+    if (!confirm('Apagar dados salvos e voltar aos valores padrão?')) return;
+    storage.limparMestre();
+    preencherDefaults();
+    recalcular();
+    syncSliderComMensalidade();
+    setText('storage_hint', 'Dados padrão restaurados.');
   });
 
   document.querySelector('[data-tab="gestao"]')?.addEventListener('click', recalcular);
 
   recalcular();
+  syncSliderComMensalidade();
 })();

@@ -275,6 +275,44 @@ function calcularRoi(m, vol) {
   return { investimentoTotal, lucroMensal: lucro, paybackMeses, roiAnualPct };
 }
 
+function calcularEquilibrioComMensalidade(mestre, mensalidade, maxBusca) {
+  const m = {
+    ...mestre,
+    precos: { ...mestre.precos, mensalidadePadrao: mensalidade },
+  };
+  return calcularEquilibrio(m, maxBusca);
+}
+
+function projecaoRoiMensal(roi, meses) {
+  const limite = meses || 24;
+  const lucro = roi.lucroMensal;
+  const invest = roi.investimentoTotal;
+  const pts = [];
+  for (let m = 0; m <= limite; m++) {
+    pts.push({
+      mes: m,
+      lucroAcumulado: lucro * m,
+      investimento: invest,
+      saldo: lucro * m - invest,
+    });
+  }
+  return pts;
+}
+
+function resumoExecutivo(mestre, r) {
+  const a = r.atual;
+  const eq = r.equilibrio;
+  return {
+    alunos: mestre.capacidade.alunosAtuais,
+    lucro: a.lucroOperacional,
+    margemPct: a.margemPct,
+    payback: r.roi.paybackMeses,
+    equilibrio: eq ? eq.alunos : null,
+    veredito: a.veredito,
+    semaforo: a.semaforo,
+  };
+}
+
 function calcularGestao(mestre) {
   const totais = totaisMestre(mestre);
   const atual = analisarVolume(mestre, mestre.capacidade.alunosAtuais);
@@ -329,5 +367,8 @@ window.GestaoEngine = {
   analisarVolume,
   calcularGestao,
   calcularEquilibrio,
+  calcularEquilibrioComMensalidade,
+  projecaoRoiMensal,
+  resumoExecutivo,
   textoAnaliseGestao,
 };

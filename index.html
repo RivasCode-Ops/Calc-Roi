@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raio-X de Negócios + Picos do Saber</title>
-    <meta name="description" content="Calculadoras de ROI, viabilidade e capacidade escolar para gestão.">
+    <title>Raio-X de Negócios + Gestão Escolar Picos do Saber</title>
+    <meta name="description" content="ROI de negócios e sistema de gestão escolar com painel mestre — viabilidade, capacidade, preços, ROI e cenários.">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -21,7 +21,7 @@
             background: #1a1a1e;
             border-radius: 20px;
             padding: 40px;
-            max-width: 680px;
+            max-width: 820px;
             width: 100%;
             box-shadow: 0 20px 60px rgba(0,0,0,.5);
         }
@@ -65,6 +65,40 @@
             margin: 12px 0;
             line-height: 1.5;
         }
+        .sub-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+        .sub-tab {
+            padding: 7px 10px;
+            border: 1px solid #2a2a30;
+            border-radius: 8px;
+            background: transparent;
+            color: #777;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .sub-tab:hover { border-color: #444; color: #bbb; }
+        .sub-tab.active { border-color: #448aff; color: #448aff; background: rgba(68,138,255,.08); }
+        .sub-panel { display: none; }
+        .sub-panel.active { display: block; }
+        .tbl { width: 100%; border-collapse: collapse; margin: 8px 0 16px; font-size: 13px; }
+        .tbl th, .tbl td { padding: 8px 6px; border-bottom: 1px solid #2a2a30; text-align: left; }
+        .tbl th { color: #666; font-size: 10px; text-transform: uppercase; letter-spacing: .4px; }
+        .tbl input { padding: 8px 10px; font-size: 14px; }
+        .tbl .col-auto { text-align: right; color: #00c853; font-weight: 600; white-space: nowrap; }
+        .tbl .col-num { width: 72px; }
+        .tbl .col-money { width: 110px; }
+        .total-row td { font-weight: 700; color: #fff; border-bottom: none; }
+        .fluxo-cap {
+            font-size: 13px;
+            color: #a0a0b0;
+            background: #121214;
+            border: 1px solid #2a2a30;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+        .modulo-result { margin-top: 8px; }
         .tab:hover { border-color: #444; color: #ccc; }
         .tab.active { border-color: #00c853; color: #00c853; background: rgba(0,200,83,.08); }
         .panel { display: none; }
@@ -330,8 +364,7 @@
     <div class="card">
         <div class="tabs" role="tablist">
             <button type="button" class="tab active" data-tab="roi" role="tab" aria-selected="true">ROI Negócios</button>
-            <button type="button" class="tab" data-tab="escola" role="tab" aria-selected="false">Capacidade</button>
-            <button type="button" class="tab" data-tab="preco" role="tab" aria-selected="false">Preços</button>
+            <button type="button" class="tab" data-tab="gestao" role="tab" aria-selected="false">Picos do Saber</button>
         </div>
 
         <div id="panel-roi" class="panel active" role="tabpanel">
@@ -435,229 +468,188 @@
         <div class="footer">Isso não é recomendação financeira. Consulte um profissional.</div>
         </div>
 
-        <div id="panel-escola" class="panel" role="tabpanel" hidden>
-            <div class="badge">Picos do Saber · Plano Diretor</div>
-            <h1>Capacidade e viabilidade escolar</h1>
-            <p class="sub">Com X alunos e Y mensalidade, a escola se sustenta? Quantas professoras, salas e quanto sobra?</p>
+        <div id="panel-gestao" class="panel" role="tabpanel" hidden>
+            <div class="badge">Picos do Saber · Sistema de Gestão</div>
+            <h1>Inteligência de gestão escolar</h1>
+            <p class="sub">Cadastre uma vez no Painel Mestre — viabilidade, capacidade, preços, ROI, cenários e equilíbrio calculam automaticamente.</p>
 
-            <form id="form-escola" action="javascript:void(0)" method="post" novalidate onsubmit="return false">
-                <p class="secao-title">Alunos e receita</p>
-                <div class="row">
-                    <div class="field">
-                        <label for="alunos">Quantidade de alunos</label>
-                        <input type="number" id="alunos" name="alunos" value="50" min="1" step="1" required>
-                    </div>
-                    <div class="field">
-                        <label for="mensalidade">Mensalidade</label>
-                        <input type="text" id="mensalidade" name="mensalidade" class="input-moeda" value="R$ 700,00" required>
-                    </div>
-                </div>
-
-                <p class="secao-title">Modelo pedagógico</p>
-                <div class="row">
-                    <div class="field">
-                        <label for="alunosTurma">Alunos por turma</label>
-                        <input type="number" id="alunosTurma" name="alunosTurma" value="8" min="1" step="1" required>
-                    </div>
-                    <div class="field">
-                        <label for="aulasSemana">Aulas por aluno / semana</label>
-                        <input type="text" id="aulasSemana" name="aulasSemana" value="2" required>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="field">
-                        <label for="duracaoAula">Duração da aula (horas)</label>
-                        <input type="text" id="duracaoAula" name="duracaoAula" value="1,5" required>
-                    </div>
-                    <div class="field">
-                        <label for="horasProfessor">Horas/semana por professora</label>
-                        <input type="number" id="horasProfessor" name="horasProfessor" value="30" min="1" step="1" required>
-                    </div>
-                </div>
-
-                <div class="field">
-                    <label>Turnos de funcionamento</label>
-                    <div class="check-row">
-                        <label><input type="checkbox" id="turnoManha" name="turnoManha" checked> Manhã</label>
-                        <label><input type="checkbox" id="turnoTarde" name="turnoTarde" checked> Tarde</label>
-                        <label><input type="checkbox" id="turnoNoite" name="turnoNoite" checked> Noite</label>
-                    </div>
-                    <p class="field-hint">Ou informe horários simultâneos por dia (se nenhum turno marcado):</p>
-                    <input type="number" id="horariosDia" name="horariosDia" placeholder="4" min="1" step="1" style="margin-top:6px">
-                </div>
-
-                <p class="secao-title">Custos mensais</p>
-                <div class="row">
-                    <div class="field">
-                        <label for="salarioProf">Salário professora</label>
-                        <input type="text" id="salarioProf" name="salarioProf" class="input-moeda" value="R$ 2.500,00" required>
-                    </div>
-                    <div class="field">
-                        <label for="salarioRecepcao">Recepção (1)</label>
-                        <input type="text" id="salarioRecepcao" name="salarioRecepcao" class="input-moeda" value="R$ 1.800,00">
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="field">
-                        <label for="custoLimpeza">Limpeza</label>
-                        <input type="text" id="custoLimpeza" name="custoLimpeza" class="input-moeda" value="R$ 800,00">
-                    </div>
-                    <div class="field">
-                        <label for="outrosCustos">Outros custos fixos</label>
-                        <input type="text" id="outrosCustos" name="outrosCustos" class="input-moeda" placeholder="R$ 0,00" value="R$ 0,00">
-                    </div>
-                </div>
-                <div class="check-row">
-                    <label><input type="checkbox" id="incluirRecepcao" name="incluirRecepcao" checked> Incluir recepcionista</label>
-                    <label><input type="checkbox" id="incluirLimpeza" name="incluirLimpeza" checked> Incluir limpeza</label>
-                </div>
-
-                <button type="button" id="btn-calcular-escola" class="btn-primary">Analisar capacidade</button>
-            </form>
-
-            <div class="result" id="resultado-escola">
-                <div class="semaforo">
-                    <div class="bola" id="esc_bola"></div>
-                    <span class="rotulo" id="esc_rotulo"></span>
-                </div>
-                <p class="destaque" id="esc_diag"></p>
-
-                <p class="secao-title">Capacidade operacional</p>
-                <div class="linha"><span class="rot">Turmas</span><span class="val" id="esc_turmas"></span></div>
-                <div class="linha"><span class="rot">Horas de aula / semana</span><span class="val" id="esc_horas"></span></div>
-                <div class="linha"><span class="rot">Professoras</span><span class="val" id="esc_prof"></span></div>
-                <div class="linha"><span class="rot">Salas simultâneas</span><span class="val" id="esc_salas"></span></div>
-                <div class="linha"><span class="rot">Recepcionistas</span><span class="val" id="esc_recep"></span></div>
-                <div class="linha"><span class="rot">Equipe limpeza</span><span class="val" id="esc_limpeza"></span></div>
-
-                <p class="secao-title">Estrutura física (estimativa)</p>
-                <div class="linha"><span class="rot">Cadeiras</span><span class="val" id="esc_cadeiras"></span></div>
-                <div class="linha"><span class="rot">Mesas</span><span class="val" id="esc_mesas"></span></div>
-                <div class="linha"><span class="rot">Quadros</span><span class="val" id="esc_quadros"></span></div>
-                <div class="linha"><span class="rot">Ar-condicionado</span><span class="val" id="esc_ac"></span></div>
-
-                <p class="secao-title">Financeiro</p>
-                <div class="linha"><span class="rot">Faturamento</span><span class="val" id="esc_fat"></span></div>
-                <div class="linha"><span class="rot">Custos — professoras</span><span class="val" id="esc_custos_prof"></span></div>
-                <div class="linha"><span class="rot">Custos — fixos</span><span class="val" id="esc_custos_fixos"></span></div>
-                <div class="linha"><span class="rot">Custos totais</span><span class="val" id="esc_custos"></span></div>
-                <div class="linha"><span class="rot">Lucro previsto</span><span class="val" id="esc_lucro"></span></div>
-                <div class="linha"><span class="rot">Mensalidade mínima (equilíbrio)</span><span class="val" id="esc_mensal_min"></span></div>
-                <div class="linha" style="border-bottom:none"><span class="rot">Custos / faturamento</span><span class="val" id="esc_folha"></span></div>
-
-                <p class="secao-title">Qual meu próximo degrau?</p>
-                <ul class="degraus-list" id="esc_degraus"></ul>
-
-                <p class="cenarios-title">Simulador de cenários (inclui seu volume)</p>
-                <div class="cenarios-grid" id="esc_cenarios"></div>
-
-                <button type="button" class="btn-copiar" id="btn-copiar-escola">Copiar análise</button>
+            <div class="sub-tabs" role="tablist">
+                <button type="button" class="sub-tab active" data-subtab="mestre" aria-selected="true">Painel Mestre</button>
+                <button type="button" class="sub-tab" data-subtab="viabilidade">Viabilidade</button>
+                <button type="button" class="sub-tab" data-subtab="capacidade">Capacidade</button>
+                <button type="button" class="sub-tab" data-subtab="preco">Preço ideal</button>
+                <button type="button" class="sub-tab" data-subtab="roi">ROI</button>
+                <button type="button" class="sub-tab" data-subtab="cenarios">Cenários</button>
+                <button type="button" class="sub-tab" data-subtab="equilibrio">Equilíbrio</button>
             </div>
 
-            <div class="footer">Ferramenta de gestão — Picos do Saber. Ajuste premissas ao seu plano diretor.</div>
-        </div>
+            <form id="form-mestre" action="javascript:void(0)" method="post" novalidate onsubmit="return false">
+            <div id="sub-mestre" class="sub-panel active">
+                <p class="secao-title">1. Investimento inicial</p>
+                <table class="tbl">
+                    <thead><tr><th>Item</th><th class="col-money">Valor</th></tr></thead>
+                    <tbody>
+                        <tr><td>Reforma</td><td><input type="text" name="inv_reforma" class="input-moeda" value="R$ 0,00"></td></tr>
+                        <tr><td>Móveis</td><td><input type="text" name="inv_moveis" class="input-moeda" value="R$ 0,00"></td></tr>
+                        <tr><td>Computadores</td><td><input type="text" name="inv_computadores" class="input-moeda" value="R$ 0,00"></td></tr>
+                        <tr><td>Ar-condicionado</td><td><input type="text" name="inv_ar" class="input-moeda" value="R$ 0,00"></td></tr>
+                        <tr><td>Identidade visual / fachada</td><td><input type="text" name="inv_identidade" class="input-moeda" value="R$ 0,00"></td></tr>
+                        <tr><td>Material inicial</td><td><input type="text" name="inv_material" class="input-moeda" value="R$ 0,00"></td></tr>
+                        <tr><td>Outros</td><td><input type="text" name="inv_outros" class="input-moeda" value="R$ 0,00"></td></tr>
+                        <tr class="total-row"><td>Total investido</td><td class="col-auto" id="tot_investimento">R$ 0,00</td></tr>
+                    </tbody>
+                </table>
 
-        <div id="panel-preco" class="panel" role="tabpanel" hidden>
-            <div class="badge">Picos do Saber · Precificação</div>
-            <h1>Preço por hora e planos comerciais</h1>
-            <p class="sub">O piso da hora da professora é referência — o preço final parte dos custos totais e direciona a família ao acompanhamento anual.</p>
-
-            <form id="form-preco" action="javascript:void(0)" method="post" novalidate onsubmit="return false">
-                <p class="secao-title">Base pedagógica</p>
+                <p class="secao-title">2. Capacidade e alunos</p>
                 <div class="row">
-                    <div class="field">
-                        <label for="alunosTotal">Total de alunos na escola</label>
-                        <input type="number" id="alunosTotal" name="alunosTotal" value="50" min="1" step="1" required>
-                    </div>
-                    <div class="field">
-                        <label for="alunosTurmaPreco">Alunos por turma</label>
-                        <input type="number" id="alunosTurmaPreco" name="alunosTurmaPreco" value="6" min="1" step="1" required>
-                    </div>
+                    <div class="field"><label for="cap_max">Capacidade máxima</label><input type="number" id="cap_max" name="cap_max" min="1" step="1"></div>
+                    <div class="field"><label for="cap_atuais">Alunos atuais</label><input type="number" id="cap_atuais" name="cap_atuais" min="1" step="1"></div>
                 </div>
                 <div class="row">
-                    <div class="field">
-                        <label for="horasEncontro">Horas por encontro</label>
-                        <input type="text" id="horasEncontro" name="horasEncontro" value="1,5" required>
-                    </div>
-                    <div class="field">
-                        <label for="encontrosSemana">Encontros por semana</label>
-                        <input type="text" id="encontrosSemana" name="encontrosSemana" value="2" required>
-                    </div>
+                    <div class="field"><label for="cap_turma">Alunos por turma</label><input type="number" id="cap_turma" name="cap_turma" min="1" step="1"></div>
+                    <div class="field"><label for="cap_turnos">Turnos de funcionamento</label><input type="number" id="cap_turnos" name="cap_turnos" min="1" step="1"></div>
+                </div>
+                <div class="row">
+                    <div class="field"><label for="cap_horas_turno">Horas por turno</label><input type="text" id="cap_horas_turno" name="cap_horas_turno"></div>
+                    <div class="field"><label for="cap_dias">Dias por semana</label><input type="number" id="cap_dias" name="cap_dias" min="1" max="7" step="1"></div>
+                </div>
+                <div class="row">
+                    <div class="field"><label for="cap_aulas_sem">Aulas por semana / aluno</label><input type="text" id="cap_aulas_sem" name="cap_aulas_sem"></div>
+                    <div class="field"><label for="cap_horas_aula">Horas por aula</label><input type="text" id="cap_horas_aula" name="cap_horas_aula"></div>
                 </div>
                 <div class="field">
-                    <label for="valorHora">Valor da hora da professora</label>
-                    <input type="text" id="valorHora" name="valorHora" class="input-moeda" value="R$ 80,00" required>
+                    <label for="cap_carga_prof">Carga máxima por professora (h/semana)</label>
+                    <input type="text" id="cap_carga_prof" name="cap_carga_prof" value="20">
+                    <p class="field-hint">Usado para calcular quantas professoras a carga pedagógica exige.</p>
                 </div>
 
-                <p class="secao-title">Custos e margem</p>
-                <div class="field">
-                    <label for="custosFixosPreco">Custos fixos mensais (aluguel, coordenação, material, marketing…)</label>
-                    <input type="text" id="custosFixosPreco" name="custosFixosPreco" class="input-moeda" value="R$ 8.000,00" required>
+                <p class="secao-title">3. Preços e planos</p>
+                <div class="row">
+                    <div class="field"><label for="pre_mensalidade">Mensalidade padrão</label><input type="text" id="pre_mensalidade" name="pre_mensalidade" class="input-moeda"></div>
+                    <div class="field"><label for="pre_desconto">Desconto anual à vista (%)</label><input type="text" id="pre_desconto" name="pre_desconto" value="10"></div>
                 </div>
                 <div class="row">
-                    <div class="field">
-                        <label for="margemLucro">Margem de lucro desejada (%)</label>
-                        <input type="text" id="margemLucro" name="margemLucro" value="20" required>
-                    </div>
-                    <div class="field">
-                        <label for="mensalidadeRef">Mensalidade de referência (opcional)</label>
-                        <input type="text" id="mensalidadeRef" name="mensalidadeRef" class="input-moeda" value="R$ 700,00" placeholder="R$ 700,00">
-                        <p class="field-hint">Ex.: Plano Evolução — para ver lucro nesse preço.</p>
-                    </div>
+                    <div class="field"><label for="pre_hora_avulsa">Hora aula avulsa (recuperação)</label><input type="text" id="pre_hora_avulsa" name="pre_hora_avulsa" class="input-moeda"></div>
+                    <div class="field"><label for="pre_pacote">Pacote intensivo (20h)</label><input type="text" id="pre_pacote" name="pre_pacote" class="input-moeda"></div>
                 </div>
 
-                <button type="button" id="btn-calcular-preco" class="btn-primary">Calcular preços e planos</button>
+                <p class="secao-title">4. Equipe</p>
+                <table class="tbl">
+                    <thead><tr><th>Cargo</th><th class="col-num">Qtd</th><th class="col-money">Salário</th><th>Total</th></tr></thead>
+                    <tbody>
+                        <tr><td>Professora coordenadora</td><td><input type="number" name="eq_coord_q" min="0" step="1" value="0"></td><td><input type="text" name="eq_coord_s" class="input-moeda"></td><td class="col-auto" id="eq_coord_t">R$ 0,00</td></tr>
+                        <tr><td>Professora auxiliar</td><td><input type="number" name="eq_aux_q" min="0" step="1" value="0"></td><td><input type="text" name="eq_aux_s" class="input-moeda"></td><td class="col-auto" id="eq_aux_t">R$ 0,00</td></tr>
+                        <tr><td>Professora reforço</td><td><input type="number" name="eq_reforco_q" min="0" step="1" value="0"></td><td><input type="text" name="eq_reforco_s" class="input-moeda"></td><td class="col-auto" id="eq_reforco_t">R$ 0,00</td></tr>
+                        <tr><td>Secretária</td><td><input type="number" name="eq_secretaria_q" min="0" step="1" value="0"></td><td><input type="text" name="eq_secretaria_s" class="input-moeda"></td><td class="col-auto" id="eq_secretaria_t">R$ 0,00</td></tr>
+                        <tr><td>Recepção</td><td><input type="number" name="eq_recepcao_q" min="0" step="1" value="0"></td><td><input type="text" name="eq_recepcao_s" class="input-moeda"></td><td class="col-auto" id="eq_recepcao_t">R$ 0,00</td></tr>
+                        <tr><td>Copeira / limpeza</td><td><input type="number" name="eq_limpeza_q" min="0" step="1" value="0"></td><td><input type="text" name="eq_limpeza_s" class="input-moeda"></td><td class="col-auto" id="eq_limpeza_t">R$ 0,00</td></tr>
+                        <tr><td>Vigia</td><td><input type="number" name="eq_vigia_q" min="0" step="1" value="0"></td><td><input type="text" name="eq_vigia_s" class="input-moeda"></td><td class="col-auto" id="eq_vigia_t">R$ 0,00</td></tr>
+                        <tr><td>Outros</td><td><input type="number" name="eq_outros_q" min="0" step="1" value="0"></td><td><input type="text" name="eq_outros_s" class="input-moeda"></td><td class="col-auto" id="eq_outros_t">R$ 0,00</td></tr>
+                        <tr class="total-row"><td colspan="3">Folha salarial total</td><td class="col-auto" id="tot_folha">R$ 0,00</td></tr>
+                    </tbody>
+                </table>
+
+                <p class="secao-title">5. Custos fixos mensais</p>
+                <table class="tbl">
+                    <tbody>
+                        <tr><td>Aluguel</td><td class="col-money"><input type="text" name="fix_aluguel" class="input-moeda"></td></tr>
+                        <tr><td>Energia</td><td><input type="text" name="fix_energia" class="input-moeda"></td></tr>
+                        <tr><td>Internet</td><td><input type="text" name="fix_internet" class="input-moeda"></td></tr>
+                        <tr><td>Água</td><td><input type="text" name="fix_agua" class="input-moeda"></td></tr>
+                        <tr><td>Material escolar</td><td><input type="text" name="fix_material_esc" class="input-moeda"></td></tr>
+                        <tr><td>Material de limpeza</td><td><input type="text" name="fix_material_lim" class="input-moeda"></td></tr>
+                        <tr><td>Marketing</td><td><input type="text" name="fix_marketing" class="input-moeda"></td></tr>
+                        <tr><td>Sistemas</td><td><input type="text" name="fix_sistemas" class="input-moeda"></td></tr>
+                        <tr><td>Contabilidade</td><td><input type="text" name="fix_contabilidade" class="input-moeda"></td></tr>
+                        <tr><td>Impostos</td><td><input type="text" name="fix_impostos" class="input-moeda"></td></tr>
+                        <tr><td>Outros</td><td><input type="text" name="fix_outros" class="input-moeda"></td></tr>
+                        <tr class="total-row"><td>Total fixo</td><td class="col-auto" id="tot_fixos">R$ 0,00</td></tr>
+                    </tbody>
+                </table>
+
+                <p class="secao-title">6. Metas financeiras</p>
+                <div class="row">
+                    <div class="field"><label for="meta_margem">Margem de lucro desejada (%)</label><input type="text" id="meta_margem" name="meta_margem"></div>
+                    <div class="field"><label for="meta_reserva">Reserva reinvestimento (%)</label><input type="text" id="meta_reserva" name="meta_reserva"></div>
+                </div>
+                <div class="field"><label for="meta_prolabore">Pró-labore dos sócios (mensal)</label><input type="text" id="meta_prolabore" name="meta_prolabore" class="input-moeda"></div>
+                <div class="linha total-row" style="border:none;padding:12px 0"><span class="rot">Custos mensais totais (folha + fixos + pró-labore)</span><span class="val" id="tot_custos_mes">R$ 0,00</span></div>
+
+                <button type="button" id="btn-calcular-gestao" class="btn-primary">Atualizar todos os módulos</button>
+            </div>
             </form>
 
-            <div class="result" id="resultado-preco">
-                <div class="semaforo">
-                    <div class="bola" id="pre_bola"></div>
-                    <span class="rotulo" id="pre_rotulo"></span>
+            <div id="sub-viabilidade" class="sub-panel modulo-result" hidden>
+                <div class="result verde" style="display:block">
+                    <div class="semaforo"><div class="bola" id="via_bola"></div><span class="rotulo" id="via_rotulo"></span></div>
+                    <p class="destaque" id="via_diag"></p>
+                    <div class="linha"><span class="rot">Receita bruta</span><span class="val" id="via_receita"></span></div>
+                    <div class="linha"><span class="rot">Folha salarial</span><span class="val" id="via_folha"></span></div>
+                    <div class="linha"><span class="rot">Custos fixos</span><span class="val" id="via_fixos"></span></div>
+                    <div class="linha"><span class="rot">Custo total</span><span class="val" id="via_custos"></span></div>
+                    <div class="linha"><span class="rot">Lucro operacional</span><span class="val" id="via_lucro"></span></div>
+                    <div class="linha" style="border-bottom:none"><span class="rot">Margem de lucro</span><span class="val" id="via_margem"></span></div>
                 </div>
-                <p class="destaque" id="pre_diag"></p>
-
-                <p class="secao-title">Bloco 1 — Piso (só hora da professora)</p>
-                <div class="aviso-piso">Referência de custo mínimo. Não use como preço final — ignora aluguel, coordenação, lucro e demais fixos.</div>
-                <div class="linha"><span class="rot">Custo por encontro (turma)</span><span class="val" id="pre_custo_encontro"></span></div>
-                <div class="linha"><span class="rot">Piso por aula / aluno</span><span class="val" id="pre_piso_aula"></span></div>
-                <div class="linha"><span class="rot">Piso mensal / aluno</span><span class="val" id="pre_piso_mes"></span></div>
-                <div class="linha" style="border-bottom:none"><span class="rot">Gap piso → custo real</span><span class="val" id="pre_gap"></span></div>
-
-                <p class="secao-title">Bloco 2 — Custo real e preço mínimo</p>
-                <div class="linha"><span class="rot">Custo professoras / mês</span><span class="val" id="pre_custo_prof"></span></div>
-                <div class="linha"><span class="rot">Custo real por aluno</span><span class="val" id="pre_custo_real"></span></div>
-                <div class="linha"><span class="rot">Preço mínimo recomendado</span><span class="val" id="pre_minimo"></span></div>
-                <div class="linha" id="pre_ref_row" style="border-bottom:none"><span class="rot">Lucro na mensalidade de referência</span><span class="val" id="pre_ref_lucro"></span></div>
-                <div class="linha" style="border-bottom:none"><span class="rot">Margem no plano sugerido</span><span class="val" id="pre_margem"></span></div>
-
-                <p class="secao-title">Planos comerciais</p>
-                <div class="plano-grid">
-                    <div class="plano-card destaque">
-                        <div class="plano-nome">🟢 Plano Evolução — Anual 12×</div>
-                        <div class="plano-valor" id="pre_plano_12"></div>
-                        <div class="plano-sub">Acompanhamento contínuo · vaga garantida</div>
-                    </div>
-                    <div class="plano-card destaque">
-                        <div class="plano-nome">🟡 Anual antecipado (−10%)</div>
-                        <div class="plano-valor" id="pre_plano_vista"></div>
-                        <div class="plano-sub" id="pre_plano_vista_det"></div>
-                    </div>
-                    <div class="plano-card premium">
-                        <div class="plano-nome">🔵 Hora avulsa — recuperação</div>
-                        <div class="plano-valor" id="pre_hora_rec"></div>
-                        <div class="plano-sub">Intervenção premium (meio do ano)</div>
-                    </div>
-                    <div class="plano-card premium">
-                        <div class="plano-nome">🔵 Pacotes intensivos</div>
-                        <div class="plano-valor" id="pre_pacote_10"></div>
-                        <div class="plano-sub" id="pre_pacote_20"></div>
-                    </div>
-                </div>
-
-                <button type="button" class="btn-copiar" id="btn-copiar-preco">Copiar análise</button>
             </div>
 
-            <div class="footer">Capacidade → custos → alunos → preço mínimo → planos. Ferramenta interna Picos do Saber.</div>
+            <div id="sub-capacidade" class="sub-panel modulo-result" hidden>
+                <div class="fluxo-cap" id="cap_fluxo"></div>
+                <div class="linha"><span class="rot">Turmas necessárias</span><span class="val" id="cap_turmas"></span></div>
+                <div class="linha"><span class="rot">Salas simultâneas</span><span class="val" id="cap_salas"></span></div>
+                <div class="linha"><span class="rot">Horas semanais (turmas)</span><span class="val" id="cap_horas"></span></div>
+                <div class="linha"><span class="rot">Horas por aluno</span><span class="val" id="cap_horas_aluno"></span></div>
+                <div class="linha"><span class="rot">Professoras necessárias</span><span class="val" id="cap_prof_nec"></span></div>
+                <div class="linha"><span class="rot">Professoras cadastradas</span><span class="val" id="cap_prof_cad"></span></div>
+                <div class="linha"><span class="rot">Carga média / professora</span><span class="val" id="cap_carga"></span></div>
+                <div class="linha" style="border-bottom:none"><span class="rot">Diagnóstico equipe</span><span class="val" id="cap_gap"></span></div>
+            </div>
+
+            <div id="sub-preco" class="sub-panel modulo-result" hidden>
+                <div class="result verde" style="display:block">
+                    <div class="semaforo"><div class="bola" id="pre_bola"></div><span class="rotulo" id="pre_rotulo"></span></div>
+                    <p class="destaque" id="pre_diag"></p>
+                    <div class="linha"><span class="rot">Custo real por aluno</span><span class="val" id="pre_custo_real"></span></div>
+                    <div class="linha"><span class="rot">Mensalidade mínima ideal</span><span class="val" id="pre_minimo"></span></div>
+                    <div class="linha" style="border-bottom:none"><span class="rot">Mensalidade cadastrada</span><span class="val" id="pre_mensal_atual"></span></div>
+                    <p class="cenarios-title">Comparativo de planos</p>
+                    <table class="tbl" id="pre_planos_tbl">
+                        <thead><tr><th>Plano</th><th>Valor</th><th>Situação</th></tr></thead>
+                        <tbody id="pre_planos_tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="sub-roi" class="sub-panel modulo-result" hidden>
+                <div class="result verde" style="display:block">
+                    <div class="semaforo"><div class="bola" id="roi_bola"></div><span class="rotulo" id="roi_rotulo"></span></div>
+                    <p class="destaque" id="roi_diag"></p>
+                    <div class="linha"><span class="rot">Investimento inicial</span><span class="val" id="roi_invest"></span></div>
+                    <div class="linha"><span class="rot">Lucro mensal</span><span class="val" id="roi_lucro"></span></div>
+                    <div class="linha"><span class="rot">Payback</span><span class="val" id="roi_payback"></span></div>
+                    <div class="linha" style="border-bottom:none"><span class="rot">ROI anual</span><span class="val" id="roi_anual"></span></div>
+                </div>
+            </div>
+
+            <div id="sub-cenarios" class="sub-panel modulo-result" hidden>
+                <p class="field-hint" id="cen_cap_max"></p>
+                <table class="tbl">
+                    <thead id="cen_thead"></thead>
+                    <tbody id="cen_tbody"></tbody>
+                </table>
+            </div>
+
+            <div id="sub-equilibrio" class="sub-panel modulo-result" hidden>
+                <div class="result verde" style="display:block">
+                    <div class="semaforo"><div class="bola" id="eqb_bola"></div><span class="rotulo" id="eqb_rotulo"></span></div>
+                    <p class="destaque" id="eqb_diag"></p>
+                    <div class="linha"><span class="rot">Custos mensais</span><span class="val" id="eqb_custos"></span></div>
+                    <div class="linha"><span class="rot">Mensalidade</span><span class="val" id="eqb_mensal"></span></div>
+                    <div class="linha" style="border-bottom:none"><span class="rot">Ponto de equilíbrio</span><span class="val" id="eqb_alunos"></span></div>
+                </div>
+            </div>
+
+            <button type="button" class="btn-copiar" id="btn-copiar-gestao">Copiar análise completa</button>
+            <div class="footer">Painel Mestre → todos os módulos. Ferramenta interna Picos do Saber.</div>
         </div>
     </div>
 
@@ -677,18 +669,16 @@
             });
           });
         });
-        ['form-roi', 'form-escola', 'form-preco'].forEach(function (fid) {
+        ['form-roi', 'form-mestre'].forEach(function (fid) {
           var f = document.getElementById(fid);
           if (!f) return;
           f.addEventListener('submit', function (e) { e.preventDefault(); return false; });
         });
       })();
     </script>
-    <script src="calc-engine.js?v=7"></script>
-    <script src="escola-engine.js?v=7"></script>
-    <script src="preco-engine.js?v=7"></script>
-    <script src="app.js?v=7"></script>
-    <script src="escola-app.js?v=7"></script>
-    <script src="preco-app.js?v=7"></script>
+    <script src="calc-engine.js?v=8"></script>
+    <script src="gestao-engine.js?v=8"></script>
+    <script src="app.js?v=8"></script>
+    <script src="gestao-app.js?v=8"></script>
 </body>
 </html>

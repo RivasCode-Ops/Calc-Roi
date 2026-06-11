@@ -6,6 +6,8 @@ const {
   parsePercentual,
   fmtPercentual,
   taxaAnualDeMensal,
+  normalizarTaxaMensal,
+  normalizarCamposMoeda,
   lerEntradaDoForm,
   textoAnalise,
   validarEntrada,
@@ -23,7 +25,7 @@ function atualizarHintRendimento() {
   const hint = document.getElementById('hint_rendimento');
   if (!hint) return;
   const inv = parseMoeda(document.getElementById('investimento')?.value);
-  const taxaMes = parsePercentual(document.getElementById('selicMes')?.value);
+  const taxaMes = normalizarTaxaMensal(document.getElementById('selicMes')?.value);
   if (taxaMes <= 0) {
     hint.textContent = 'Informe o % mensal — o anual é calculado automaticamente.';
     return;
@@ -129,34 +131,48 @@ function renderBase(r, taxaAnual, taxaMensal) {
   resultado.style.display = 'block';
 }
 
+function mostrarErro(mensagem) {
+  resultado.className = 'result vermelho';
+  resultado.style.display = 'block';
+  document.getElementById('bola').className = 'bola vermelho';
+  document.getElementById('rotulo').textContent = 'Revise os campos';
+  document.getElementById('destaque').textContent = mensagem;
+  cenariosEl.innerHTML = '';
+  document.getElementById('feedback').style.display = 'none';
+  atualizarHintRendimento();
+  resultado.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
 function calcular() {
-  document.getElementById('fb_obrigado').style.display = 'none';
-  document.querySelectorAll('.fb-btn').forEach((b) => b.classList.remove('selecionado'));
+  try {
+    document.getElementById('fb_obrigado').style.display = 'none';
+    document.querySelectorAll('.fb-btn').forEach((b) => b.classList.remove('selecionado'));
 
-  const entrada = lerEntradaDoForm(form);
-  if (!validarEntrada(entrada)) {
-    resultado.style.display = 'block';
-    resultado.className = 'result vermelho';
-    document.getElementById('bola').className = 'bola vermelho';
-    document.getElementById('rotulo').textContent = 'Preencha os campos obrigatórios';
-    document.getElementById('destaque').textContent =
-      'Investimento, clientes, ticket, custos e rendimento mensal da aplicação são obrigatórios.';
-    cenariosEl.innerHTML = '';
-    document.getElementById('feedback').style.display = 'none';
-    return;
+    normalizarCamposMoeda(form);
+    const entrada = lerEntradaDoForm(form);
+    if (!validarEntrada(entrada)) {
+      const lista = entrada._faltando?.join(', ') || 'campos obrigatórios';
+      mostrarErro('Faltam ou estão inválidos: ' + lista + '.');
+      return;
+    }
+
+    document.getElementById('feedback').style.display = 'block';
+    const todos = calcularTodosCenarios(entrada);
+    const base = todos.base;
+    ultimoPacote = { entrada, base, todos };
+
+    renderBase(base, entrada.taxaRendaFixaAnual, entrada.taxaRendaFixaMensal);
+    cenariosEl.innerHTML = [
+      renderCenarioCard('Pessimista (−25% clientes)', todos.pessimista),
+      renderCenarioCard('Base', todos.base),
+      renderCenarioCard('Otimista (+25% clientes)', todos.otimista),
+    ].join('');
+    atualizarHintRendimento();
+    resultado.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } catch (err) {
+    console.error(err);
+    mostrarErro('Erro ao calcular. Atualize a página (Ctrl+F5) e tente de novo.');
   }
-
-  document.getElementById('feedback').style.display = 'block';
-  const todos = calcularTodosCenarios(entrada);
-  const base = todos.base;
-  ultimoPacote = { entrada, base, todos };
-
-  renderBase(base, entrada.taxaRendaFixaAnual, entrada.taxaRendaFixaMensal);
-  cenariosEl.innerHTML = [
-    renderCenarioCard('Pessimista (−25% clientes)', todos.pessimista),
-    renderCenarioCard('Base', todos.base),
-    renderCenarioCard('Otimista (+25% clientes)', todos.otimista),
-  ].join('');
 }
 
 form.addEventListener('submit', (e) => {

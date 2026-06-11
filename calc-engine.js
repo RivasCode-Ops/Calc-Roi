@@ -100,9 +100,28 @@ function aplicarMascaraMoeda(el) {
 
 function parsePercentual(str) {
   if (!str) return 0;
-  const limpo = String(str).replace('%', '').trim().replace(/\./g, '').replace(',', '.');
-  const n = parseFloat(limpo);
+  const s = String(str).replace('%', '').trim();
+  if (!s) return 0;
+  if (s.includes(',')) {
+    const n = parseFloat(s.replace(/\./g, '').replace(',', '.'));
+    return Number.isFinite(n) ? n : 0;
+  }
+  if (s.includes('.')) {
+    const partes = s.split('.');
+    if (partes.length === 2 && partes[1].length <= 2) {
+      const n = parseFloat(s);
+      return Number.isFinite(n) ? n : 0;
+    }
+  }
+  const n = parseFloat(s.replace(/\./g, ''));
   return Number.isFinite(n) ? n : 0;
+}
+
+/** Aceita % a.m. ou % a.a. (se > 1,5, trata como anual). */
+function normalizarTaxaMensal(str) {
+  const taxa = parsePercentual(str);
+  if (taxa <= 0) return 0;
+  return taxa > 1.5 ? taxa / 12 : taxa;
 }
 
 function fmtPercentual(v, casas = 2) {
@@ -113,8 +132,14 @@ function taxaAnualDeMensal(taxaMensal) {
   return taxaMensal * 12;
 }
 
+function normalizarCamposMoeda(form) {
+  form.querySelectorAll('.input-moeda').forEach((el) => {
+    if (el.value.trim()) aplicarMascaraMoeda(el);
+  });
+}
+
 function lerEntradaDoForm(form) {
-  const taxaMensal = parsePercentual(form.selicMes?.value);
+  const taxaMensal = normalizarTaxaMensal(form.selicMes?.value);
   return {
     investimentoTotal: parseMoeda(form.investimento.value),
     numeroClientes: parseInt(form.clientes.value, 10) || 0,
@@ -129,13 +154,14 @@ function lerEntradaDoForm(form) {
 }
 
 function validarEntrada(e) {
-  return (
-    e.investimentoTotal > 0 &&
-    e.numeroClientes > 0 &&
-    e.ticketMedio > 0 &&
-    e.custosMensais >= 0 &&
-    e.taxaRendaFixaMensal > 0
-  );
+  const faltando = [];
+  if (e.investimentoTotal <= 0) faltando.push('investimento');
+  if (e.numeroClientes <= 0) faltando.push('clientes');
+  if (e.ticketMedio <= 0) faltando.push('ticket médio');
+  if (e.custosMensais < 0) faltando.push('custos');
+  if (e.taxaRendaFixaMensal <= 0) faltando.push('rendimento da aplicação');
+  e._faltando = faltando;
+  return faltando.length === 0;
 }
 
 function textoAnalise(entrada, base) {
@@ -178,6 +204,8 @@ window.CalcEngine = {
   parseMoeda,
   aplicarMascaraMoeda,
   parsePercentual,
+  normalizarTaxaMensal,
+  normalizarCamposMoeda,
   fmtPercentual,
   taxaAnualDeMensal,
   lerEntradaDoForm,

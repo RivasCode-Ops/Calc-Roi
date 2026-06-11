@@ -109,9 +109,9 @@
             border-radius: 14px;
             display: none;
         }
-        .result.verde { background: #0d2b1a; }
-        .result.amarelo { background: #2b240d; }
-        .result.vermelho { background: #2b0d0d; }
+        .result.verde { background: #0d2b1a; display: block; }
+        .result.amarelo { background: #2b240d; display: block; }
+        .result.vermelho { background: #2b0d0d; display: block; }
         .semaforo { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
         .bola { width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; }
         .bola.verde { background: #00c853; }
@@ -272,7 +272,7 @@
             <div class="field">
                 <label for="selicMes">Rendimento da aplicação (% ao mês)</label>
                 <input type="text" id="selicMes" name="selicMes" inputmode="decimal" placeholder="0,75" required autocomplete="off">
-                <p class="field-hint" id="hint_rendimento">Informe o % mensal — o anual é calculado automaticamente.</p>
+                <p class="field-hint" id="hint_rendimento">Informe % ao mês (ex.: 0,75) ou % ao ano (ex.: 9) — o sistema ajusta e calcula o equivalente.</p>
             </div>
 
             <button type="button" class="btn-link" id="toggle-avancado" aria-expanded="false">

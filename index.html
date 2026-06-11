@@ -250,7 +250,7 @@
         <h1>ROI do negócio vs. dinheiro aplicado</h1>
         <p class="sub">Compare lucro mensal, payback e três cenários (pessimista, base, otimista) com o rendimento da renda fixa.</p>
 
-        <form id="form-roi">
+        <form id="form-roi" action="javascript:void(0)" method="post" novalidate onsubmit="return false">
             <div class="field">
                 <label for="investimento">Quanto você vai investir?</label>
                 <input type="text" id="investimento" name="investimento" class="input-moeda" inputmode="numeric" placeholder="R$ 200.000,00" required autocomplete="off">
@@ -297,7 +297,7 @@
                 </div>
             </div>
 
-            <button type="submit">Analisar viabilidade</button>
+            <button type="button" id="btn-calcular">Analisar viabilidade</button>
         </form>
 
         <div class="result" id="resultado" role="region" aria-live="polite" aria-label="Resultado da análise">
@@ -346,7 +346,17 @@
         <div class="footer">Isso não é recomendação financeira. Consulte um profissional.</div>
     </div>
 
-    <script src="calc-engine.js"></script>
-    <script src="app.js"></script>
+    <script>
+      (function () {
+        var f = document.getElementById('form-roi');
+        if (!f) return;
+        f.addEventListener('submit', function (e) { e.preventDefault(); return false; });
+        f.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault();
+        });
+      })();
+    </script>
+    <script src="calc-engine.js?v=4"></script>
+    <script src="app.js?v=4"></script>
 </body>
 </html>

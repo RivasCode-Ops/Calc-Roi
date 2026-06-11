@@ -86,8 +86,14 @@ function fmtMoeda(v) {
 
 function parseMoeda(str) {
   if (!str) return 0;
-  const limpo = String(str).replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.');
-  const n = parseFloat(limpo);
+  const s = String(str).trim();
+  if (!s) return 0;
+  if (s.includes(',') || s.includes('R$')) {
+    const limpo = s.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.');
+    const n = parseFloat(limpo);
+    return Number.isFinite(n) ? n : 0;
+  }
+  const n = parseFloat(s.replace(/[^\d.-]/g, ''));
   return Number.isFinite(n) ? n : 0;
 }
 
@@ -134,7 +140,10 @@ function taxaAnualDeMensal(taxaMensal) {
 
 function normalizarCamposMoeda(form) {
   form.querySelectorAll('.input-moeda').forEach((el) => {
-    if (el.value.trim()) aplicarMascaraMoeda(el);
+    const v = el.value.trim();
+    if (!v) return;
+    const valor = parseMoeda(v);
+    el.value = fmtMoeda(valor);
   });
 }
 

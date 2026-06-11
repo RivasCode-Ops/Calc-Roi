@@ -84,15 +84,46 @@ function fmtMoeda(v) {
   return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function parseMoeda(str) {
+  if (!str) return 0;
+  const limpo = String(str).replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.');
+  const n = parseFloat(limpo);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function aplicarMascaraMoeda(el) {
+  const digitos = el.value.replace(/\D/g, '');
+  const centavos = (parseInt(digitos, 10) || 0) / 100;
+  el.value = fmtMoeda(centavos);
+  return centavos;
+}
+
+function parsePercentual(str) {
+  if (!str) return 0;
+  const limpo = String(str).replace('%', '').trim().replace(/\./g, '').replace(',', '.');
+  const n = parseFloat(limpo);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function fmtPercentual(v, casas = 2) {
+  return v.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas });
+}
+
+function taxaAnualDeMensal(taxaMensal) {
+  return taxaMensal * 12;
+}
+
 function lerEntradaDoForm(form) {
+  const taxaMensal = parsePercentual(form.selicMes?.value);
   return {
-    investimentoTotal: parseFloat(form.investimento.value) || 0,
+    investimentoTotal: parseMoeda(form.investimento.value),
     numeroClientes: parseInt(form.clientes.value, 10) || 0,
-    ticketMedio: parseFloat(form.ticket.value) || 0,
-    custosMensais: parseFloat(form.custos.value) || 0,
-    taxaRendaFixaAnual: parseFloat(form.selic.value) || 0,
-    prolaboreMensal: parseFloat(form.prolabore?.value) || 0,
-    valorEquipamentos: parseFloat(form.equipamentos?.value) || 0,
+    ticketMedio: parseMoeda(form.ticket.value),
+    custosMensais: parseMoeda(form.custos.value),
+    taxaRendaFixaMensal: taxaMensal,
+    taxaRendaFixaAnual: taxaAnualDeMensal(taxaMensal),
+    prolaboreMensal: parseMoeda(form.prolabore?.value),
+    valorEquipamentos: parseMoeda(form.equipamentos?.value),
     vidaUtilMeses: parseInt(form.vidaUtil?.value, 10) || 60,
   };
 }
@@ -103,7 +134,7 @@ function validarEntrada(e) {
     e.numeroClientes > 0 &&
     e.ticketMedio > 0 &&
     e.custosMensais >= 0 &&
-    e.taxaRendaFixaAnual > 0
+    e.taxaRendaFixaMensal > 0
   );
 }
 
@@ -115,6 +146,7 @@ function textoAnalise(entrada, base) {
     '=== RAIO-X DE NEGÓCIOS V2 ===',
     '',
     'INVESTIMENTO: ' + fmtMoeda(entrada.investimentoTotal),
+    'RENDIMENTO APLICAÇÃO: ' + fmtPercentual(entrada.taxaRendaFixaMensal) + '% a.m. · ' + fmtPercentual(entrada.taxaRendaFixaAnual) + '% a.a.',
     'APLICAÇÃO FINANCEIRA rende (ano): ' + fmtMoeda(base.rendimentoPassivoAnual),
     'NEGÓCIO retorna (ano): ' + fmtMoeda(base.lucroAnual),
     'LUCRO MENSAL (base): ' + fmtMoeda(base.lucroMensal),
@@ -143,6 +175,11 @@ window.CalcEngine = {
   calcularCenario,
   calcularTodosCenarios,
   fmtMoeda,
+  parseMoeda,
+  aplicarMascaraMoeda,
+  parsePercentual,
+  fmtPercentual,
+  taxaAnualDeMensal,
   lerEntradaDoForm,
   validarEntrada,
   textoAnalise,

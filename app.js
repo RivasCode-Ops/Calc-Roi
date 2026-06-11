@@ -1,6 +1,11 @@
 const {
   calcularTodosCenarios,
   fmtMoeda,
+  aplicarMascaraMoeda,
+  parseMoeda,
+  parsePercentual,
+  fmtPercentual,
+  taxaAnualDeMensal,
   lerEntradaDoForm,
   textoAnalise,
   validarEntrada,
@@ -13,6 +18,35 @@ const toggleAvancado = document.getElementById('toggle-avancado');
 const avancado = document.getElementById('avancado');
 
 let ultimoPacote = null;
+
+function atualizarHintRendimento() {
+  const hint = document.getElementById('hint_rendimento');
+  if (!hint) return;
+  const inv = parseMoeda(document.getElementById('investimento')?.value);
+  const taxaMes = parsePercentual(document.getElementById('selicMes')?.value);
+  if (taxaMes <= 0) {
+    hint.textContent = 'Informe o % mensal — o anual é calculado automaticamente.';
+    return;
+  }
+  const taxaAno = taxaAnualDeMensal(taxaMes);
+  let texto =
+    'Equivale a ' + fmtPercentual(taxaAno) + '% a.a. (calculado automaticamente)';
+  if (inv > 0) {
+    const rfMes = inv * (taxaMes / 100);
+    const rfAno = inv * (taxaAno / 100);
+    texto += ' · rende ' + fmtMoeda(rfMes) + '/mês · ' + fmtMoeda(rfAno) + '/ano';
+  }
+  hint.innerHTML = texto;
+}
+
+document.querySelectorAll('.input-moeda').forEach((el) => {
+  el.addEventListener('input', () => {
+    aplicarMascaraMoeda(el);
+    atualizarHintRendimento();
+  });
+});
+
+document.getElementById('selicMes')?.addEventListener('input', atualizarHintRendimento);
 
 toggleAvancado?.addEventListener('click', () => {
   const aberto = avancado.hidden;
@@ -33,13 +67,19 @@ function renderCenarioCard(nome, r) {
     </div>`;
 }
 
-function renderBase(r, taxaAnual) {
+function renderBase(r, taxaAnual, taxaMensal) {
   document.getElementById('bola').className = 'bola ' + r.semaforo;
   document.getElementById('rotulo').textContent = r.veredito;
 
   document.getElementById('cmp_rf_ano').textContent = fmtMoeda(r.rendimentoPassivoAnual) + '/ano';
+  const taxaMes = taxaAnual / 12;
   document.getElementById('cmp_rf_mes').textContent =
-    fmtMoeda(r.rendimentoPassivoMensal) + '/mês · ' + taxaAnual.toFixed(1) + '% a.a.';
+    fmtMoeda(r.rendimentoPassivoMensal) +
+    '/mês · ' +
+    fmtPercentual(taxaMes) +
+    '% a.m. · ' +
+    fmtPercentual(taxaAnual) +
+    '% a.a.';
   document.getElementById('cmp_neg_ano').textContent = fmtMoeda(r.lucroAnual) + '/ano';
   document.getElementById('cmp_neg_mes').textContent =
     fmtMoeda(r.lucroMensal) + '/mês · ROI ' + r.roiAnualPercentual.toFixed(2) + '% a.a.';
@@ -100,7 +140,7 @@ function calcular() {
     document.getElementById('bola').className = 'bola vermelho';
     document.getElementById('rotulo').textContent = 'Preencha os campos obrigatórios';
     document.getElementById('destaque').textContent =
-      'Investimento, clientes, ticket, custos e taxa de renda fixa são obrigatórios.';
+      'Investimento, clientes, ticket, custos e rendimento mensal da aplicação são obrigatórios.';
     cenariosEl.innerHTML = '';
     document.getElementById('feedback').style.display = 'none';
     return;
@@ -111,7 +151,7 @@ function calcular() {
   const base = todos.base;
   ultimoPacote = { entrada, base, todos };
 
-  renderBase(base, entrada.taxaRendaFixaAnual);
+  renderBase(base, entrada.taxaRendaFixaAnual, entrada.taxaRendaFixaMensal);
   cenariosEl.innerHTML = [
     renderCenarioCard('Pessimista (−25% clientes)', todos.pessimista),
     renderCenarioCard('Base', todos.base),

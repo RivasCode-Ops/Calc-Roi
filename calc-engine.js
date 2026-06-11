@@ -1,0 +1,149 @@
+/** Motor de cálculo — Raio-X de Negócios V2 (espelha calc_engine.py) */
+
+const CENARIO_FATOR = {
+  pessimista: 0.75,
+  base: 1.0,
+  otimista: 1.25,
+};
+
+/**
+ * @param {object} entrada
+ * @param {'pessimista'|'base'|'otimista'} cenario
+ */
+function calcularCenario(entrada, cenario = 'base') {
+  const fator = CENARIO_FATOR[cenario] ?? 1;
+  const clientes = Math.max(0, Math.round(entrada.numeroClientes * fator));
+  const fat = clientes * entrada.ticketMedio;
+
+  const dep =
+    entrada.valorEquipamentos > 0 && entrada.vidaUtilMeses > 0
+      ? entrada.valorEquipamentos / entrada.vidaUtilMeses
+      : 0;
+
+  const lucro =
+    fat - entrada.custosMensais - entrada.prolaboreMensal - dep;
+
+  const inv = entrada.investimentoTotal;
+  const roi = inv > 0 ? (lucro / inv) * 100 : 0;
+  const payback = lucro > 0 ? inv / lucro : null;
+
+  const selicMensalPct = entrada.taxaRendaFixaAnual / 12;
+  const rf = inv > 0 ? inv * (selicMensalPct / 100) : 0;
+  const rfAnual = inv > 0 ? inv * (entrada.taxaRendaFixaAnual / 100) : 0;
+  const diff = lucro - rf;
+  const lucroAnual = lucro * 12;
+  const roiAnual = inv > 0 ? (lucroAnual / inv) * 100 : 0;
+  const depAnual = dep * 12;
+
+  let veredito;
+  let semaforo;
+  if (lucro <= 0) {
+    veredito = 'Prejuízo';
+    semaforo = 'vermelho';
+  } else if (diff >= 0 && roi >= selicMensalPct * 2) {
+    veredito = 'Atrativo';
+    semaforo = 'verde';
+  } else if (diff >= 0) {
+    veredito = 'Atenção';
+    semaforo = 'amarelo';
+  } else {
+    veredito = 'Melhor deixar aplicado';
+    semaforo = 'vermelho';
+  }
+
+  return {
+    cenario,
+    clientes,
+    faturamentoMensal: fat,
+    depreciacaoMensal: dep,
+    depreciacaoAnual: depAnual,
+    lucroMensal: lucro,
+    lucroAnual,
+    roiMensalPercentual: roi,
+    roiAnualPercentual: roiAnual,
+    paybackMeses: payback,
+    rendimentoPassivoMensal: rf,
+    rendimentoPassivoAnual: rfAnual,
+    diferencialRendaFixa: diff,
+    diferencialRendaFixaAnual: lucroAnual - rfAnual,
+    veredito,
+    semaforo,
+  };
+}
+
+/** @param {object} entrada */
+function calcularTodosCenarios(entrada) {
+  return {
+    pessimista: calcularCenario(entrada, 'pessimista'),
+    base: calcularCenario(entrada, 'base'),
+    otimista: calcularCenario(entrada, 'otimista'),
+  };
+}
+
+function fmtMoeda(v) {
+  return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function lerEntradaDoForm(form) {
+  return {
+    investimentoTotal: parseFloat(form.investimento.value) || 0,
+    numeroClientes: parseInt(form.clientes.value, 10) || 0,
+    ticketMedio: parseFloat(form.ticket.value) || 0,
+    custosMensais: parseFloat(form.custos.value) || 0,
+    taxaRendaFixaAnual: parseFloat(form.selic.value) || 0,
+    prolaboreMensal: parseFloat(form.prolabore?.value) || 0,
+    valorEquipamentos: parseFloat(form.equipamentos?.value) || 0,
+    vidaUtilMeses: parseInt(form.vidaUtil?.value, 10) || 60,
+  };
+}
+
+function validarEntrada(e) {
+  return (
+    e.investimentoTotal > 0 &&
+    e.numeroClientes > 0 &&
+    e.ticketMedio > 0 &&
+    e.custosMensais >= 0 &&
+    e.taxaRendaFixaAnual > 0
+  );
+}
+
+function textoAnalise(entrada, base) {
+  const sinal = base.diferencialRendaFixa >= 0 ? '+' : '−';
+  const payback =
+    base.paybackMeses == null ? '—' : base.paybackMeses.toFixed(1) + ' meses';
+  const linhas = [
+    '=== RAIO-X DE NEGÓCIOS V2 ===',
+    '',
+    'INVESTIMENTO: ' + fmtMoeda(entrada.investimentoTotal),
+    'APLICAÇÃO FINANCEIRA rende (ano): ' + fmtMoeda(base.rendimentoPassivoAnual),
+    'NEGÓCIO retorna (ano): ' + fmtMoeda(base.lucroAnual),
+    'LUCRO MENSAL (base): ' + fmtMoeda(base.lucroMensal),
+    'RENDA PASSIVA (mês): ' + fmtMoeda(base.rendimentoPassivoMensal),
+    'DIFERENÇA (mês): ' + sinal + ' ' + fmtMoeda(Math.abs(base.diferencialRendaFixa)),
+    'DIFERENÇA (ano): ' + (base.diferencialRendaFixaAnual >= 0 ? '+' : '−') + ' ' + fmtMoeda(Math.abs(base.diferencialRendaFixaAnual)),
+    'ROI mensal: ' + base.roiMensalPercentual.toFixed(2) + '% · anual: ' + base.roiAnualPercentual.toFixed(2) + '%',
+    'PAYBACK: ' + payback,
+    'VEREDITO: ' + base.veredito,
+    '',
+    'CENÁRIOS — lucro mensal:',
+    '  Pessimista (75% clientes): ' + fmtMoeda(calcularCenario(entrada, 'pessimista').lucroMensal),
+    '  Base: ' + fmtMoeda(base.lucroMensal),
+    '  Otimista (125% clientes): ' + fmtMoeda(calcularCenario(entrada, 'otimista').lucroMensal),
+    '',
+    'Gerado em https://rivascode-ops.github.io/Calc-Roi',
+  ];
+  if (base.depreciacaoAnual > 0) {
+    linhas.splice(12, 0, 'DEPRECIAÇÃO (ano): ' + fmtMoeda(base.depreciacaoAnual));
+  }
+  return linhas.join('\n');
+}
+
+window.CalcEngine = {
+  CENARIO_FATOR,
+  calcularCenario,
+  calcularTodosCenarios,
+  fmtMoeda,
+  lerEntradaDoForm,
+  validarEntrada,
+  textoAnalise,
+};

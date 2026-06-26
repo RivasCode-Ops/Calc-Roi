@@ -119,3 +119,5 @@ No final: o que reaproveitou, arquivos alterados, implementação pronta.
 | SaaS | evolução manual | roadmap em `docs/roadmap-saas.md` |
 
 **Regra prática:** validação rápida com visual do Calc-Roi → este prompt. Produto modular longo prazo → EduPrice.
+
+Config e engine já disponíveis: `reforco-pricing.config.js`, `reforco-pricing-engine.js`, guia em `docs/REFORCO-PRICING.md`.

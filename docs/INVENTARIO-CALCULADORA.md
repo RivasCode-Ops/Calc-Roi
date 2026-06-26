@@ -1,12 +1,28 @@
 # Inventário — Calc-Roi (Raio-X · Reforço · Picos)
 
-**Referência de código:** `master@8bd1b33` (produção / GitHub Pages · inclui este inventário) · branch `simulacao-precos-reforco@bf91a5c` (simulação comercial) · **26/06/2026**
+**Referência de código:** `master@bfdd87d` (produção / GitHub Pages) · branch `simulacao-precos-reforco@bf91a5c` (simulação comercial · **não** em Pages) · **26/06/2026**
 
 **URL produção:** https://rivascode-ops.github.io/Calc-Roi/  
 **URL local:** http://localhost:8765/ (`scripts/servir.ps1`, `SERVIR.bat` ou `python -m http.server 8765`)  
 **Inventário (GitHub):** https://github.com/RivasCode-Ops/Calc-Roi/blob/master/docs/INVENTARIO-CALCULADORA.md
 
-SPA estática (HTML/CSS/JS vanilla). Sem backend, sem build. Três abas principais no `index.html`.
+SPA estática (HTML/CSS/JS vanilla). Sem backend, sem build. **Três abas** no `index.html`: ROI Negócios · Precificação Reforço · Picos do Saber.
+
+### Nomenclatura de versão (evitar confusão)
+
+| Onde aparece | Significado | Valor atual (`master`) |
+|--------------|-------------|------------------------|
+| Badge na UI — ROI | Rótulo de produto na tela | `Raio-X de Negócios · V2 · cenários salvos` |
+| Badge na UI — Picos | Rótulo de produto na tela | `Picos do Saber · Gestão Escolar v9` |
+| `?v=` nos `<script>` | **Cache bust** do navegador, não versão de negócio | ex.: `gestao-engine.js?v=10`, `gestao-app.js?v=11`, `app.js?v=11` |
+| `README.md` roadmap | Marcos de entrega (V9 localStorage/PDF, V10 VPL/TIR) | V10 concluído em código |
+
+**Regra:** citar versão oficial use badge UI + roadmap README; **não** confundir `?v=11` com “versão 11 do Picos”.
+
+### Integração entre abas
+
+- **Não existe** `window.sharedStorage` nem ponte automática Reforço → Picos no código atual (`master`).
+- Cada aba tem motor e persistência próprios (ROI: `roi-storage.js`; Picos: `gestao-storage.js`; Reforço: sem cenários salvos na v1).
 
 ---
 
@@ -38,7 +54,7 @@ SPA estática (HTML/CSS/JS vanilla). Sem backend, sem build. Três abas principa
 
 | Ambiente | Commit / branch | Tabela |
 |----------|-----------------|--------|
-| **Produção (Pages)** | `master@8bd1b33` | **Homologada** — valores de exemplo até tabela da escola |
+| **Produção (Pages)** | `master` (config 35/40/50/60 · fatores 1,00/0,65/0,55/0,45) | **Homologada** — valores de exemplo até tabela da escola |
 | **Simulação (rascunho)** | `simulacao-precos-reforco@bf91a5c` · PR #2 draft | **Mercado** — discussão comercial, **não mergear** sem confirmação |
 
 #### Produção (`master`) — homologada em jun/2026
@@ -77,6 +93,8 @@ Mesmas faixas de desconto e semanas. **Tabela comercial definitiva ainda depende
 | **Gráficos / PDF** | `gestao-charts.js`, `gestao-export.js` |
 
 **Módulos** (calculam a partir do Painel Mestre): Viabilidade, Capacidade, Preço ideal, ROI escolar, Cenários, Equilíbrio.
+
+**UI Picos:** badge e `#gestao-resumo` ficam **no topo do painel** (rolam com o conteúdo; **não** são `position: fixed/sticky`). Sub-abas (`Painel Mestre`, `Viabilidade`, …) abaixo do resumo.
 
 ---
 
@@ -117,8 +135,19 @@ Espelham `calc-engine.js`, `gestao-engine.js` e `reforco-pricing-engine.js`. Na 
 
 ---
 
-## 7. Pendências conhecidas (negócio, não técnico)
+## 7. Pendências conhecidas
 
-- Substituir `reforco-pricing.config.js` em `master` pela **tabela comercial confirmada** (Projeto 2).
+### Negócio (Projeto 2)
+
+- Substituir `reforco-pricing.config.js` em **`master`** pela tabela comercial confirmada (não confundir com `simulacao-precos-reforco`).
 - Revalidar coluna "Esperado" em `docs/HOMOLOGACAO-REFORCO.md` após troca de preços.
-- PR #2 (`simulacao-precos-reforco`) permanece **draft** até decisão da escola.
+- PR #2 permanece **draft** até decisão da escola.
+
+### Backlog de produto (não implementado)
+
+| # | Item | Notas |
+|---|------|-------|
+| 1 | Numerar abas principais na UI (1 ROI · 2 Reforço · 3 Picos) | Hoje só texto nas tabs |
+| 2 | CTA “levar preço ao Picos” (Reforço → mensalidade no Painel Mestre) | Sem integração hoje |
+| 3 | Resumo executivo fixo na aba ROI (equivalente ao `#gestao-resumo` do Picos) | ROI mostra resultado após calcular, sem barra resumo persistente |
+| 4 | Orientação de fluxo entre módulos (onboarding curto entre abas) | Documentação existe; UI não guia |

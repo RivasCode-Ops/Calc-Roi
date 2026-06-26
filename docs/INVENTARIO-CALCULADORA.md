@@ -1,8 +1,9 @@
 # Inventário — Calc-Roi (Raio-X · Reforço · Picos)
 
-**Referência de código:** `master@0a10cf9` (produção / GitHub Pages) · branch `simulacao-precos-reforco@bf91a5c` (simulação comercial) · **26/06/2026**
+**Referência de código:** `master@01210ad` (produção / GitHub Pages · inclui este inventário) · branch `simulacao-precos-reforco@bf91a5c` (simulação comercial) · **26/06/2026**
 
-**URL produção:** https://rivascode-ops.github.io/Calc-Roi/
+**URL produção:** https://rivascode-ops.github.io/Calc-Roi/  
+**Inventário (GitHub):** https://github.com/RivasCode-Ops/Calc-Roi/blob/master/docs/INVENTARIO-CALCULADORA.md
 
 SPA estática (HTML/CSS/JS vanilla). Sem backend, sem build. Três abas principais no `index.html`.
 
@@ -36,7 +37,7 @@ SPA estática (HTML/CSS/JS vanilla). Sem backend, sem build. Três abas principa
 
 | Ambiente | Commit / branch | Tabela |
 |----------|-----------------|--------|
-| **Produção (Pages)** | `master@0a10cf9` | **Homologada** — valores de exemplo até tabela da escola |
+| **Produção (Pages)** | `master@01210ad` | **Homologada** — valores de exemplo até tabela da escola |
 | **Simulação (rascunho)** | `simulacao-precos-reforco@bf91a5c` · PR #2 draft | **Mercado** — discussão comercial, **não mergear** sem confirmação |
 
 #### Produção (`master`) — homologada em jun/2026

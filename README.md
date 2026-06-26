@@ -2,7 +2,7 @@
 
 Calculadora de **ROI para negócios** e **sistema de inteligência de gestão escolar** (Picos do Saber).
 
-**Live:** https://rivascode-ops.github.io/Calc-Roi
+**Live:** https://rivascode-ops.github.io/Calc-Roi/
 
 ## Produtos
 

@@ -10,9 +10,11 @@ alwaysApply: true
 Dois módulos numa SPA estática (`index.html`):
 
 - **ROI Negócios** — payback, cenários, comparativo com renda fixa
+- **Precificação Reforço** — mensalidade por segmento/modalidade (`reforco-pricing.config.js`)
 - **Picos do Saber** — Painel Mestre + 6 módulos de gestão escolar
 
-Live: https://rivascode-ops.github.io/Calc-Roi
+Live: https://rivascode-ops.github.io/Calc-Roi/  
+Inventário: `docs/INVENTARIO-CALCULADORA.md`
 
 ## Stack
 

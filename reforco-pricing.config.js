@@ -1,8 +1,10 @@
 /**
  * Configuração de precificação — Reforço Escolar
  *
+ * SIMULAÇÃO DE MERCADO — branch `simulacao-precos-reforco` apenas.
+ * Não é a tabela oficial da escola. `master` mantém valores homologados.
+ *
  * Ajuste valores aqui sem alterar a engine (reforco-pricing-engine.js).
- * Valores abaixo são EXEMPLO inicial — substitua pela tabela real da escola.
  */
 const REFORCO_PRICING_CONFIG = {
   /** Semanas consideradas em um mês para cálculo de mensalidade */
@@ -14,19 +16,19 @@ const REFORCO_PRICING_CONFIG = {
   segmentos: {
     infantil_4_5: {
       label: 'Infantil 4-5 anos',
-      valorHoraBase: 35,
+      valorHoraBase: 45,
     },
     fundamental_1_5: {
       label: '1º ao 5º ano',
-      valorHoraBase: 40,
+      valorHoraBase: 50,
     },
     fundamental_6_9: {
       label: '6º ao 9º ano',
-      valorHoraBase: 50,
+      valorHoraBase: 60,
     },
     ensino_medio: {
       label: 'Ensino médio',
-      valorHoraBase: 60,
+      valorHoraBase: 70,
     },
   },
 
@@ -42,17 +44,17 @@ const REFORCO_PRICING_CONFIG = {
     },
     dupla: {
       label: 'Dupla',
-      fatorPorAluno: 0.65,
+      fatorPorAluno: 0.70,
       alunosReferencia: 2,
     },
     trio: {
       label: 'Trio',
-      fatorPorAluno: 0.55,
+      fatorPorAluno: 0.60,
       alunosReferencia: 3,
     },
     grupo: {
       label: 'Grupo',
-      fatorPorAluno: 0.45,
+      fatorPorAluno: 0.50,
       alunosReferencia: 6,
     },
   },

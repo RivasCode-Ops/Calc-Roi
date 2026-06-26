@@ -4,15 +4,21 @@ from __future__ import annotations
 
 import pytest
 
+# Simulação de mercado (branch simulacao-precos-reforco)
 CONFIG = {
     "semanasPorMes": 4,
     "duracaoPadraoMinutos": 60,
     "segmentos": {
-        "fundamental_1_5": {"label": "1º ao 5º ano", "valorHoraBase": 40},
+        "infantil_4_5": {"label": "Infantil 4-5 anos", "valorHoraBase": 45},
+        "fundamental_1_5": {"label": "1º ao 5º ano", "valorHoraBase": 50},
+        "fundamental_6_9": {"label": "6º ao 9º ano", "valorHoraBase": 60},
+        "ensino_medio": {"label": "Ensino médio", "valorHoraBase": 70},
     },
     "modalidades": {
         "individual": {"label": "Individual", "fatorPorAluno": 1.0, "alunosReferencia": 1},
-        "dupla": {"label": "Dupla", "fatorPorAluno": 0.65, "alunosReferencia": 2},
+        "dupla": {"label": "Dupla", "fatorPorAluno": 0.70, "alunosReferencia": 2},
+        "trio": {"label": "Trio", "fatorPorAluno": 0.60, "alunosReferencia": 3},
+        "grupo": {"label": "Grupo", "fatorPorAluno": 0.50, "alunosReferencia": 6},
     },
     "descontosPorAulasNoMes": [
         {"minAulas": 0, "descontoPct": 0, "label": "Sem desconto"},
@@ -58,9 +64,9 @@ def test_individual_sem_desconto():
     r = calcular_preco_reforco(
         {"segmentoId": "fundamental_1_5", "modalidadeId": "individual", "aulasPorSemana": 1}
     )
-    assert r["valorPorAula"] == 40
+    assert r["valorPorAula"] == 50
     assert r["aulasPorMes"] == 4
-    assert r["mensalidadePorAluno"] == 160
+    assert r["mensalidadePorAluno"] == 200
     assert r["descontoPct"] == 0
 
 
@@ -68,8 +74,38 @@ def test_dupla_fator_por_aluno():
     r = calcular_preco_reforco(
         {"segmentoId": "fundamental_1_5", "modalidadeId": "dupla", "aulasPorSemana": 1}
     )
-    assert r["valorPorAula"] == pytest.approx(26)
-    assert r["mensalidadePorAluno"] == pytest.approx(104)
+    assert r["valorPorAula"] == pytest.approx(35)
+    assert r["mensalidadePorAluno"] == pytest.approx(140)
+
+
+def test_cenario_1_em_individual():
+    r = calcular_preco_reforco(
+        {
+            "segmentoId": "ensino_medio",
+            "modalidadeId": "individual",
+            "aulasPorSemana": 2,
+            "duracaoMinutos": 60,
+        }
+    )
+    assert r["valorPorAula"] == 70
+    assert r["aulasPorMes"] == 8
+    assert r["descontoPct"] == 5
+    assert r["mensalidadePorAluno"] == pytest.approx(532)
+
+
+def test_cenario_2_fundamental_trio():
+    r = calcular_preco_reforco(
+        {
+            "segmentoId": "fundamental_1_5",
+            "modalidadeId": "trio",
+            "aulasPorSemana": 3,
+            "duracaoMinutos": 60,
+        }
+    )
+    assert r["valorPorAula"] == pytest.approx(30)
+    assert r["aulasPorMes"] == 12
+    assert r["descontoPct"] == 10
+    assert r["mensalidadePorAluno"] == pytest.approx(324)
 
 
 def test_infantil_dupla_45min():
@@ -79,20 +115,10 @@ def test_infantil_dupla_45min():
             "modalidadeId": "dupla",
             "aulasPorSemana": 1,
             "duracaoMinutos": 45,
-        },
-        config={
-            **CONFIG,
-            "segmentos": {
-                "infantil_4_5": {"label": "Infantil", "valorHoraBase": 35},
-            },
-            "modalidades": {
-                **CONFIG["modalidades"],
-                "dupla": {"label": "Dupla", "fatorPorAluno": 0.65, "alunosReferencia": 2},
-            },
-        },
+        }
     )
-    assert r["valorPorAula"] == pytest.approx(17.0625)
-    assert r["mensalidadePorAluno"] == pytest.approx(68.25)
+    assert r["valorPorAula"] == pytest.approx(23.625)
+    assert r["mensalidadePorAluno"] == pytest.approx(94.50)
 
 
 def test_desconto_12_aulas():
@@ -101,4 +127,4 @@ def test_desconto_12_aulas():
     )
     assert r["aulasPorMes"] == 12
     assert r["descontoPct"] == 10
-    assert r["mensalidadePorAluno"] == pytest.approx(432)
+    assert r["mensalidadePorAluno"] == pytest.approx(540)

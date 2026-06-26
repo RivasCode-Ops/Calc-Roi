@@ -1,5 +1,5 @@
 (function () {
-  if (!window.CalcEngine || !window.GestaoEngine) return;
+  if (!window.CalcEngine || !window.GestaoEngine || !window.FluxoCaixaEngine) return;
 
   const { fmtMoeda, aplicarMascaraMoeda, parseMoeda } = window.CalcEngine;
   const {
@@ -14,6 +14,7 @@
     resumoExecutivo,
     textoAnaliseGestao,
   } = window.GestaoEngine;
+  const { lerEntradaFluxoCaixa, calcularFluxoCaixaDoMestre } = window.FluxoCaixaEngine;
   const storage = window.GestaoStorage;
   const charts = window.GestaoCharts;
   const exporter = window.GestaoExport;
@@ -261,6 +262,46 @@
     );
   }
 
+  function renderFluxoCaixa(m) {
+    const fcPanel = document.getElementById('sub-fluxo-caixa');
+    if (!fcPanel) return;
+
+    const fcEntrada = lerEntradaFluxoCaixa(fcPanel, parseMoeda);
+    const r = calcularFluxoCaixaDoMestre(m, totaisMestre, fcEntrada);
+    const v = r.veredito;
+
+    renderSemaforo(
+      'fc',
+      { veredito: v.texto, semaforo: v.semaforo },
+      m.capacidade.alunosAtuais +
+        ' alunos · mensalidade ' +
+        fmtMoeda(m.precos.mensalidadePadrao) +
+        ' · projeção de 1 mês.'
+    );
+
+    setText('fc_val_saldo_inicial', fmtMoeda(r.saldoInicial));
+    setText('fc_val_entradas', fmtMoeda(r.entradasTotais));
+    setText('fc_val_saidas', fmtMoeda(r.saidasTotais));
+    setText('fc_val_fluxo', fmtMoeda(r.fluxoMes));
+    setText('fc_val_saldo_final', fmtMoeda(r.saldoFinal));
+
+    setText('fc_det_receita_bruta', fmtMoeda(r.receitaBruta));
+    setText(
+      'fc_det_receita_ajustada',
+      fmtMoeda(r.receitaBrutaAjustada) +
+        ' (' +
+        r.alunosPagantes.toFixed(1).replace('.', ',') +
+        ' pagantes)'
+    );
+    setText('fc_det_inadimplencia', '− ' + fmtMoeda(r.perdaInadimplencia));
+    setText('fc_det_receita_liquida', fmtMoeda(r.receitaLiquidaMensalidades));
+    setText('fc_det_outras_entradas', fmtMoeda(fcEntrada.outrosEntradas));
+
+    setText('fc_det_operacao', fmtMoeda(r.saidasOperacionais));
+    setText('fc_det_investimentos', fmtMoeda(r.investimentosMes));
+    setText('fc_det_outras_saidas', fmtMoeda(r.outrosSaidas));
+  }
+
   function renderModulo(subtab, m, r, opts) {
     const a = r.atual;
     if (subtab === 'viabilidade') renderViabilidade(a);
@@ -271,6 +312,7 @@
     if (subtab === 'equilibrio') {
       renderEquilibrio(r.equilibrio, m, a, opts?.mensalidadeSimulada);
     }
+    if (subtab === 'fluxo-caixa') renderFluxoCaixa(m);
   }
 
   function recalcular() {
@@ -425,9 +467,19 @@
     setText('eqb_slider_val', fmtMoeda(m));
   }
 
+  function initFluxoCaixaInputs() {
+    const fcPanel = document.getElementById('sub-fluxo-caixa');
+    if (!fcPanel) return;
+    fcPanel.querySelectorAll('input').forEach((el) => {
+      el.addEventListener('input', recalcular);
+      el.addEventListener('change', recalcular);
+    });
+  }
+
   aplicarMascaras();
   initSubTabs();
   initSliderEquilibrio();
+  initFluxoCaixaInputs();
 
   let carregou = false;
   if (storage) {

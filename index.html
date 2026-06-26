@@ -626,7 +626,7 @@
         <div id="panel-gestao" class="panel" role="tabpanel" hidden>
             <div class="badge">Picos do Saber · Gestão Escolar v9</div>
             <h1>Inteligência de gestão escolar</h1>
-            <p class="sub">Cadastre uma vez no Painel Mestre — viabilidade, capacidade, preços, ROI, cenários e equilíbrio calculam automaticamente.</p>
+            <p class="sub">Cadastre uma vez no Painel Mestre — viabilidade, capacidade, preços, ROI, cenários, equilíbrio e fluxo de caixa calculam automaticamente.</p>
 
             <div id="gestao-resumo" class="resumo-exec" hidden>
                 <strong>Resumo:</strong> <span id="resumo_linha"></span>
@@ -640,6 +640,7 @@
                 <button type="button" class="sub-tab" data-subtab="roi">ROI</button>
                 <button type="button" class="sub-tab" data-subtab="cenarios">Cenários</button>
                 <button type="button" class="sub-tab" data-subtab="equilibrio">Equilíbrio</button>
+                <button type="button" class="sub-tab" data-subtab="fluxo-caixa">Fluxo de Caixa</button>
             </div>
 
             <form id="form-mestre" action="javascript:void(0)" method="post" novalidate onsubmit="return false">
@@ -816,6 +817,60 @@
                 </div>
             </div>
 
+            <div id="sub-fluxo-caixa" class="sub-panel modulo-result" hidden>
+                <p class="field-hint">Projeção de caixa para <strong>1 mês</strong>. Usa alunos, mensalidade, folha, fixos e pró-labore do Painel Mestre.</p>
+                <div class="row">
+                    <div class="field">
+                        <label for="fc_saldo_inicial">Saldo inicial em caixa</label>
+                        <input type="text" id="fc_saldo_inicial" class="input-moeda" inputmode="numeric" placeholder="R$ 0,00" value="R$ 0,00" autocomplete="off">
+                    </div>
+                    <div class="field">
+                        <label for="fc_inadimplencia_pct">Inadimplência prevista (%)</label>
+                        <input type="text" id="fc_inadimplencia_pct" inputmode="decimal" placeholder="5" value="5" autocomplete="off">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="field">
+                        <label for="fc_evasao_pct">Evasão / cancelamento (%)</label>
+                        <input type="text" id="fc_evasao_pct" inputmode="decimal" placeholder="0" value="0" autocomplete="off">
+                    </div>
+                    <div class="field">
+                        <label for="fc_investimentos_mes">Investimentos no mês</label>
+                        <input type="text" id="fc_investimentos_mes" class="input-moeda" inputmode="numeric" placeholder="R$ 0,00" value="R$ 0,00" autocomplete="off">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="field">
+                        <label for="fc_outros_entradas">Outras entradas (matrículas, pacotes)</label>
+                        <input type="text" id="fc_outros_entradas" class="input-moeda" inputmode="numeric" placeholder="R$ 0,00" value="R$ 0,00" autocomplete="off">
+                    </div>
+                    <div class="field">
+                        <label for="fc_outros_saidas">Outras saídas (não recorrentes)</label>
+                        <input type="text" id="fc_outros_saidas" class="input-moeda" inputmode="numeric" placeholder="R$ 0,00" value="R$ 0,00" autocomplete="off">
+                    </div>
+                </div>
+                <div class="result verde" id="fc_resultado" style="display:block">
+                    <div class="semaforo"><div class="bola" id="fc_bola"></div><span class="rotulo" id="fc_rotulo"></span></div>
+                    <p class="destaque" id="fc_diag">Atualize o Painel Mestre e abra esta aba após calcular.</p>
+                    <p class="secao-title" style="margin-top:12px">Resumo do mês</p>
+                    <div class="linha"><span class="rot">Saldo inicial</span><span class="val" id="fc_val_saldo_inicial"></span></div>
+                    <div class="linha"><span class="rot">Entradas totais</span><span class="val" id="fc_val_entradas"></span></div>
+                    <div class="linha"><span class="rot">Saídas totais</span><span class="val" id="fc_val_saidas"></span></div>
+                    <div class="linha"><span class="rot">Fluxo de caixa do mês</span><span class="val" id="fc_val_fluxo"></span></div>
+                    <div class="linha" style="border-bottom:none"><span class="rot">Saldo final</span><span class="val" id="fc_val_saldo_final"></span></div>
+                    <p class="secao-title" style="margin-top:16px">Detalhe das entradas</p>
+                    <div class="linha"><span class="rot">Mensalidades previstas (bruto)</span><span class="val" id="fc_det_receita_bruta"></span></div>
+                    <div class="linha"><span class="rot">Após evasão</span><span class="val" id="fc_det_receita_ajustada"></span></div>
+                    <div class="linha"><span class="rot">Perda por inadimplência</span><span class="val" id="fc_det_inadimplencia"></span></div>
+                    <div class="linha"><span class="rot">Mensalidades líquidas</span><span class="val" id="fc_det_receita_liquida"></span></div>
+                    <div class="linha" style="border-bottom:none"><span class="rot">Outras entradas</span><span class="val" id="fc_det_outras_entradas"></span></div>
+                    <p class="secao-title" style="margin-top:16px">Detalhe das saídas</p>
+                    <div class="linha"><span class="rot">Operação (folha + fixos + pró-labore)</span><span class="val" id="fc_det_operacao"></span></div>
+                    <div class="linha"><span class="rot">Investimentos no mês</span><span class="val" id="fc_det_investimentos"></span></div>
+                    <div class="linha" style="border-bottom:none"><span class="rot">Outras saídas</span><span class="val" id="fc_det_outras_saidas"></span></div>
+                </div>
+            </div>
+
             <div class="acoes-gestao">
                 <button type="button" class="btn-copiar" id="btn-copiar-gestao">Copiar análise</button>
                 <button type="button" class="btn-sec" id="btn-pdf-gestao">Baixar PDF</button>
@@ -855,10 +910,11 @@
     <script src="reforco-app.js?v=1"></script>
     <script src="roi-storage.js?v=11"></script>
     <script src="gestao-engine.js?v=10"></script>
+    <script src="fluxo-caixa-engine.js?v=1"></script>
     <script src="gestao-storage.js?v=10"></script>
     <script src="gestao-charts.js?v=10"></script>
     <script src="gestao-export.js?v=11"></script>
     <script src="app.js?v=11"></script>
-    <script src="gestao-app.js?v=11"></script>
+    <script src="gestao-app.js?v=12"></script>
 </body>
 </html>

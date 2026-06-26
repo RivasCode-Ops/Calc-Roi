@@ -121,6 +121,7 @@ Mesmas faixas de desconto e semanas. **Tabela comercial definitiva ainda depende
 | `reforco-pricing-engine.js` / `reforco-app.js` | Motor e UI reforço |
 | `gestao-*.js` | Picos do Saber |
 | `docs/HOMOLOGACAO-REFORCO.md` | Checklist homologação (issue #1 fechada) |
+| `docs/APRESENTACAO-CALCULADORA.md` | One-pager comercial / apresentação |
 | `docs/REFORCO-PRICING.md` | Fórmula e plug-in do módulo reforço |
 
 ---

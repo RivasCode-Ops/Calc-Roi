@@ -4,6 +4,8 @@ Calculadora de **ROI para negócios** e **sistema de inteligência de gestão es
 
 **Live:** https://rivascode-ops.github.io/Calc-Roi/
 
+Apresentação (one-pager): `docs/APRESENTACAO-CALCULADORA.md` · Inventário técnico: `docs/INVENTARIO-CALCULADORA.md`
+
 ## Produtos
 
 ### ROI Negócios

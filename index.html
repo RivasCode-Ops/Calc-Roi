@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raio-X de Negócios + Gestão Escolar Picos do Saber</title>
-    <meta name="description" content="ROI de negócios e sistema de gestão escolar com painel mestre — viabilidade, capacidade, preços, ROI e cenários.">
+    <title>Raio-X de Negócios · Precificação Reforço · Picos do Saber</title>
+    <meta name="description" content="ROI de negócios, precificação de reforço escolar e gestão escolar Picos do Saber.">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -431,6 +431,14 @@
         .fb-btn:hover { border-color: #00c853; color: #00c853; }
         .fb-btn.selecionado { border-color: #00c853; background: rgba(0,200,83,.1); color: #00c853; }
         .fb-obrigado { text-align: center; font-size: 12px; color: #00c853; margin-top: 10px; display: none; }
+        .obs-list {
+            margin: 8px 0 0;
+            padding-left: 18px;
+            font-size: 12px;
+            color: #a0a0b0;
+            line-height: 1.55;
+        }
+        .obs-list li { margin-bottom: 4px; }
         .footer { margin-top: 20px; text-align: center; font-size: 11px; color: #444; }
         @media (max-width: 560px) {
             .card { padding: 24px; }
@@ -446,6 +454,7 @@
     <div class="card">
         <div class="tabs" role="tablist">
             <button type="button" class="tab active" data-tab="roi" role="tab" aria-selected="true">ROI Negócios</button>
+            <button type="button" class="tab" data-tab="reforco" role="tab" aria-selected="false">Precificação Reforço</button>
             <button type="button" class="tab" data-tab="gestao" role="tab" aria-selected="false">Picos do Saber</button>
         </div>
 
@@ -566,6 +575,52 @@
         </div>
 
         <div class="footer">Isso não é recomendação financeira. Consulte um profissional.</div>
+        </div>
+
+        <div id="panel-reforco" class="panel" role="tabpanel" hidden>
+            <div class="badge">Reforço Escolar · Precificação · config ajustável</div>
+            <h1>Mensalidade sugerida para reforço escolar</h1>
+            <p class="sub">Calcule valor por aula, aulas no mês e mensalidade por aluno conforme segmento, modalidade e volume. Valores base em <code style="font-size:11px;color:#888">reforco-pricing.config.js</code>.</p>
+
+            <form id="form-reforco" action="javascript:void(0)" method="post" novalidate onsubmit="return false">
+                <div class="field">
+                    <label for="reforco_segmento">Segmento de ensino</label>
+                    <select id="reforco_segmento" name="reforco_segmento" required></select>
+                </div>
+                <div class="field">
+                    <label for="reforco_modalidade">Modalidade</label>
+                    <select id="reforco_modalidade" name="reforco_modalidade" required></select>
+                </div>
+                <div class="row">
+                    <div class="field">
+                        <label for="reforco_aulas_semana">Aulas por semana</label>
+                        <input type="number" id="reforco_aulas_semana" name="reforco_aulas_semana" min="1" max="14" step="1" value="2" required>
+                    </div>
+                    <div class="field">
+                        <label for="reforco_duracao">Duração da aula (minutos)</label>
+                        <input type="number" id="reforco_duracao" name="reforco_duracao" min="30" max="180" step="15" value="60" required>
+                    </div>
+                </div>
+                <p class="field-hint">Descontos automáticos por volume de aulas no mês (8+ e 12+). Ajuste regras no arquivo de configuração.</p>
+                <button type="button" id="btn-reforco-calcular" class="btn-primary">Calcular mensalidade</button>
+            </form>
+
+            <div class="result" id="reforco-resultado" role="region" aria-live="polite" aria-label="Resultado da precificação" style="display:none">
+                <div class="semaforo">
+                    <div class="bola" id="reforco_bola"></div>
+                    <span class="rotulo" id="reforco_rotulo"></span>
+                </div>
+                <div class="destaque" id="reforco_destaque"></div>
+                <div class="linha"><span class="rot">Valor por aula (por aluno)</span><span class="val" id="reforco_valor_aula"></span></div>
+                <div class="linha"><span class="rot">Aulas no mês</span><span class="val" id="reforco_aulas_mes"></span></div>
+                <div class="linha"><span class="rot">Subtotal antes do desconto</span><span class="val" id="reforco_subtotal"></span></div>
+                <div class="linha"><span class="rot">Desconto aplicado</span><span class="val" id="reforco_desconto"></span></div>
+                <div class="linha"><span class="rot">Mensalidade por aluno</span><span class="val" id="reforco_mensalidade"></span></div>
+                <div class="linha" id="reforco_receita_row" hidden style="border-bottom:none"><span class="rot" id="reforco_receita_rot">Receita turma</span><span class="val" id="reforco_receita_turma"></span></div>
+                <div id="reforco_obs"></div>
+            </div>
+
+            <div class="footer">Valores de exemplo — substitua pela tabela real da escola. Ferramenta Picos do Saber.</div>
         </div>
 
         <div id="panel-gestao" class="panel" role="tabpanel" hidden>
@@ -785,7 +840,7 @@
             });
           });
         });
-        ['form-roi', 'form-mestre'].forEach(function (fid) {
+        ['form-roi', 'form-mestre', 'form-reforco'].forEach(function (fid) {
           var f = document.getElementById(fid);
           if (!f) return;
           f.addEventListener('submit', function (e) { e.preventDefault(); return false; });
@@ -795,6 +850,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
     <script src="calc-engine.js?v=11"></script>
+    <script src="reforco-pricing.config.js?v=1"></script>
+    <script src="reforco-pricing-engine.js?v=1"></script>
+    <script src="reforco-app.js?v=1"></script>
     <script src="roi-storage.js?v=11"></script>
     <script src="gestao-engine.js?v=10"></script>
     <script src="gestao-storage.js?v=10"></script>

@@ -65,10 +65,14 @@ ReforcoPricingEngine.calcularPrecoReforco({
 
 ## Onde plugar no Calc-Roi
 
-1. Nova aba ou substituir aba ROI — copiar estrutura de `form-roi` + `resultado` em `index.html`
-2. Novo `reforco-app.js` — padrão de `app.js` (validação, render, localStorage opcional)
-3. Scripts após config + engine
-4. Prompt completo: `docs/PROMPT-PRECIFICACAO-REFORCO.md`
+✅ **UI integrada** — aba **Precificação Reforço** em `index.html` + `reforco-app.js`.
+
+Arquivos da integração:
+
+| Arquivo | Função |
+|---------|--------|
+| `index.html` | Aba, formulário, área de resultado |
+| `reforco-app.js` | Liga form → `calcularPrecoReforco()` |
 
 ## Prompt curto (Cursor)
 

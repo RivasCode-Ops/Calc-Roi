@@ -6,6 +6,75 @@ const CENARIO_FATOR = {
   otimista: 1.25,
 };
 
+const HORIZONTE_PADRAO_MESES = 60;
+
+/** Fator de valor presente de anuidade (pagamentos no fim de cada período). */
+function fatorAnuidade(taxaDecimal, periodos) {
+  if (periodos <= 0) return 0;
+  if (Math.abs(taxaDecimal) < 1e-12) return periodos;
+  return (1 - Math.pow(1 + taxaDecimal, -periodos)) / taxaDecimal;
+}
+
+/**
+ * VPL: investimento inicial + fluxos mensais constantes descontados pela taxa da aplicação.
+ * @returns {number}
+ */
+function calcularVpl(investimento, lucroMensal, taxaMensalPct, horizonteMeses) {
+  if (investimento <= 0 || horizonteMeses <= 0) return 0;
+  const i = taxaMensalPct / 100;
+  if (lucroMensal <= 0) return -investimento;
+  return lucroMensal * fatorAnuidade(i, horizonteMeses) - investimento;
+}
+
+/**
+ * TIR mensal (% a.m.) por bisseção — fluxo: −investimento, depois lucro constante por N meses.
+ * @returns {number|null} percentual a.m. ou null se não houver TIR positiva
+ */
+function calcularTirMensal(investimento, lucroMensal, horizonteMeses) {
+  if (investimento <= 0 || lucroMensal <= 0 || horizonteMeses <= 0) return null;
+
+  function npv(taxaDecimal) {
+    if (taxaDecimal <= -1) return Infinity;
+    let soma = -investimento;
+    const base = 1 + taxaDecimal;
+    for (let t = 1; t <= horizonteMeses; t++) {
+      soma += lucroMensal / Math.pow(base, t);
+    }
+    return soma;
+  }
+
+  let lo = -0.99;
+  let hi = 10;
+  let fLo = npv(lo);
+  let fHi = npv(hi);
+  if (fLo * fHi > 0) {
+    hi = 50;
+    fHi = npv(hi);
+    if (fLo * fHi > 0) return null;
+  }
+
+  for (let iter = 0; iter < 80; iter++) {
+    const mid = (lo + hi) / 2;
+    const fMid = npv(mid);
+    if (Math.abs(fMid) < 1e-7 || hi - lo < 1e-9) return mid * 100;
+    if (fLo * fMid <= 0) {
+      hi = mid;
+      fHi = fMid;
+    } else {
+      lo = mid;
+      fLo = fMid;
+    }
+  }
+  return ((lo + hi) / 2) * 100;
+}
+
+/** TIR anual efetiva a partir da TIR mensal (% a.m.). */
+function tirAnualEfetiva(tirMensalPct) {
+  if (tirMensalPct == null) return null;
+  const r = tirMensalPct / 100;
+  return (Math.pow(1 + r, 12) - 1) * 100;
+}
+
 /**
  * @param {object} entrada
  * @param {'pessimista'|'base'|'otimista'} cenario
@@ -35,6 +104,11 @@ function calcularCenario(entrada, cenario = 'base') {
   const roiAnual = inv > 0 ? (lucroAnual / inv) * 100 : 0;
   const depAnual = dep * 12;
 
+  const horizonteMeses = entrada.horizonteAnaliseMeses ?? HORIZONTE_PADRAO_MESES;
+  const vpl = calcularVpl(inv, lucro, selicMensalPct, horizonteMeses);
+  const tirMensalPct = calcularTirMensal(inv, lucro, horizonteMeses);
+  const tirAnualPct = tirAnualEfetiva(tirMensalPct);
+
   let veredito;
   let semaforo;
   if (lucro <= 0) {
@@ -62,6 +136,10 @@ function calcularCenario(entrada, cenario = 'base') {
     roiMensalPercentual: roi,
     roiAnualPercentual: roiAnual,
     paybackMeses: payback,
+    horizonteAnaliseMeses: horizonteMeses,
+    vpl,
+    tirMensalPercentual: tirMensalPct,
+    tirAnualPercentual: tirAnualPct,
     rendimentoPassivoMensal: rf,
     rendimentoPassivoAnual: rfAnual,
     diferencialRendaFixa: diff,
@@ -159,6 +237,7 @@ function lerEntradaDoForm(form) {
     prolaboreMensal: parseMoeda(form.prolabore?.value),
     valorEquipamentos: parseMoeda(form.equipamentos?.value),
     vidaUtilMeses: parseInt(form.vidaUtil?.value, 10) || 60,
+    horizonteAnaliseMeses: Math.max(1, parseInt(form.horizonte?.value, 10) || HORIZONTE_PADRAO_MESES),
   };
 }
 
@@ -190,6 +269,17 @@ function textoAnalise(entrada, base) {
     'DIFERENÇA (ano): ' + (base.diferencialRendaFixaAnual >= 0 ? '+' : '−') + ' ' + fmtMoeda(Math.abs(base.diferencialRendaFixaAnual)),
     'ROI mensal: ' + base.roiMensalPercentual.toFixed(2) + '% · anual: ' + base.roiAnualPercentual.toFixed(2) + '%',
     'PAYBACK: ' + payback,
+    'VPL (' +
+      base.horizonteAnaliseMeses +
+      ' meses, taxa aplicação): ' +
+      fmtMoeda(base.vpl),
+    base.tirMensalPercentual != null
+      ? 'TIR: ' +
+        fmtPercentual(base.tirMensalPercentual) +
+        '% a.m. · ' +
+        fmtPercentual(base.tirAnualPercentual) +
+        '% a.a. (efetiva)'
+      : 'TIR: — (sem lucro positivo no horizonte)',
     'VEREDITO: ' + base.veredito,
     '',
     'CENÁRIOS — lucro mensal:',
@@ -207,6 +297,11 @@ function textoAnalise(entrada, base) {
 
 window.CalcEngine = {
   CENARIO_FATOR,
+  HORIZONTE_PADRAO_MESES,
+  fatorAnuidade,
+  calcularVpl,
+  calcularTirMensal,
+  tirAnualEfetiva,
   calcularCenario,
   calcularTodosCenarios,
   fmtMoeda,

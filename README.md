@@ -47,9 +47,8 @@ python calc_roi.py
 **Cursor:** regras em `.cursor/rules/`, guia em `AGENTS.md`, MCP em `docs/MCP-SETUP.md`.
 
 ```bash
-# Configurar MCP do projeto (v2 — dry-run + checklist primeiro)
-node cursor-mcp-configurator-v2.js --servers filesystem,github,postgres,fetch,memory --project --dry-run --print-checklist
-node cursor-mcp-configurator-v2.js --servers filesystem,github,postgres,fetch,memory --project --open-cursor --print-checklist
+# MCP global (recomendado — uma vez)
+node cursor-mcp-configurator-v2.js --global-kit --clean --print-checklist
 ```
 
 ## Testes
@@ -78,7 +77,7 @@ python -m pytest test_calc_engine.py test_gestao_engine.py -q
 - [x] V3 Gestão — Painel Mestre ERP, 6 módulos automáticos
 - [x] V9 — localStorage, gráficos, PDF, resumo executivo
 - [x] V10 (parcial) — cenários ROI salvos com nome
-- [ ] V10 — VPL, TIR
+- [x] V10 — VPL, TIR (horizonte configurável, taxa = aplicação)
 
 ## Stack
 

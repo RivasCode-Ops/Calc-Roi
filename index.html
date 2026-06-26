@@ -452,7 +452,7 @@
         <div id="panel-roi" class="panel active" role="tabpanel">
         <div class="badge">Raio‑X de Negócios · V2 · cenários salvos</div>
         <h1>ROI do negócio vs. dinheiro aplicado</h1>
-        <p class="sub">Compare lucro mensal, payback e três cenários (pessimista, base, otimista) com o rendimento da renda fixa.</p>
+        <p class="sub">Compare lucro mensal, payback, VPL, TIR e três cenários (pessimista, base, otimista) com o rendimento da renda fixa.</p>
 
         <form id="form-roi" action="javascript:void(0)" method="post" novalidate onsubmit="return false">
             <div class="field">
@@ -499,6 +499,11 @@
                         <input type="number" id="vidaUtil" name="vidaUtil" placeholder="60" step="1" min="1" value="60">
                     </div>
                 </div>
+                <div class="field">
+                    <label for="horizonte">Horizonte VPL/TIR (meses)</label>
+                    <input type="number" id="horizonte" name="horizonte" placeholder="60" step="1" min="1" max="360" value="60">
+                    <p class="field-hint">Padrão 60 meses (5 anos). VPL usa a taxa da aplicação como custo de oportunidade.</p>
+                </div>
             </div>
 
             <button type="button" id="btn-calcular" class="btn-primary">Analisar viabilidade</button>
@@ -539,6 +544,8 @@
             <div class="linha" id="r_dep_row" hidden><span class="rot">Depreciação</span><span class="val" id="r_dep"></span></div>
             <div class="linha"><span class="rot">ROI</span><span class="val" id="r_roi"></span></div>
             <div class="linha"><span class="rot">Payback</span><span class="val" id="r_pay"></span></div>
+            <div class="linha"><span class="rot" id="r_vpl_rot">VPL</span><span class="val" id="r_vpl"></span></div>
+            <div class="linha"><span class="rot">TIR</span><span class="val" id="r_tir"></span></div>
             <div class="linha" style="border-bottom:none"><span class="rot">Diferença mensal (negócio − aplicação)</span><span class="val" id="r_diff"></span></div>
             <div class="destaque" id="destaque"></div>
 
@@ -787,13 +794,13 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
-    <script src="calc-engine.js?v=10"></script>
-    <script src="roi-storage.js?v=10"></script>
+    <script src="calc-engine.js?v=11"></script>
+    <script src="roi-storage.js?v=11"></script>
     <script src="gestao-engine.js?v=10"></script>
     <script src="gestao-storage.js?v=10"></script>
     <script src="gestao-charts.js?v=10"></script>
     <script src="gestao-export.js?v=10"></script>
-    <script src="app.js?v=10"></script>
+    <script src="app.js?v=11"></script>
     <script src="gestao-app.js?v=10"></script>
 </body>
 </html>

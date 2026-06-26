@@ -58,6 +58,8 @@ function resumoDeResultado(base) {
     semaforo: base.semaforo,
     veredito: base.veredito,
     roiAnualPercentual: base.roiAnualPercentual,
+    vpl: base.vpl,
+    tirAnualPercentual: base.tirAnualPercentual,
   };
 }
 

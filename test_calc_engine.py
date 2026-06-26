@@ -2,7 +2,14 @@
 
 import pytest
 
-from calc_engine import EntradaRoi, calcular_cenario, calcular_todos_cenarios
+from calc_engine import (
+    EntradaRoi,
+    calcular_cenario,
+    calcular_tir_mensal,
+    calcular_todos_cenarios,
+    calcular_vpl,
+    tir_anual_efetiva,
+)
 
 
 def test_cenario_base_lucro_positivo():
@@ -58,3 +65,39 @@ def test_prejuizo_vermelho():
     assert r.lucro_mensal < 0
     assert r.semaforo == "vermelho"
     assert r.veredito == "Prejuízo"
+    assert r.vpl == pytest.approx(-10_000)
+    assert r.tir_mensal_percentual is None
+
+
+def test_vpl_positivo_com_taxa_zero():
+    assert calcular_vpl(100_000, 7_000, 0, 60) == pytest.approx(320_000)
+
+
+def test_vpl_descontado():
+    vpl = calcular_vpl(200_000, 7_000, 1.0, 60)
+    assert vpl > 0
+    assert vpl < calcular_vpl(200_000, 7_000, 0, 60)
+
+
+def test_tir_mensal_positiva():
+    tir = calcular_tir_mensal(200_000, 7_000, 60)
+    assert tir is not None
+    assert tir > 0
+    tir_a = tir_anual_efetiva(tir)
+    assert tir_a is not None
+    assert tir_a > tir
+
+
+def test_cenario_base_inclui_vpl_tir():
+    e = EntradaRoi(
+        investimento_total=200_000,
+        numero_clientes=100,
+        ticket_medio=150,
+        custos_mensais=8_000,
+        taxa_renda_fixa_anual=12,
+    )
+    r = calcular_cenario(e, "base")
+    assert r.horizonte_analise_meses == 60
+    assert r.vpl > 0
+    assert r.tir_mensal_percentual is not None
+    assert r.tir_anual_percentual is not None

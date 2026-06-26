@@ -58,6 +58,7 @@
         const meta = [
           lucro,
           res.roiAnualPercentual != null ? res.roiAnualPercentual.toFixed(1) + '% a.a.' : null,
+          res.vpl != null ? 'VPL ' + fmtMoeda(res.vpl) : null,
           res.veredito || null,
           roiStorage.formatarDataSalva(item.savedAt),
         ]
@@ -220,6 +221,22 @@
       r.roiMensalPercentual.toFixed(2) + '%/mês · ' + r.roiAnualPercentual.toFixed(2) + '%/ano';
     document.getElementById('r_pay').textContent =
       r.paybackMeses == null ? '—' : r.paybackMeses.toFixed(1) + ' meses';
+
+    const meses = r.horizonteAnaliseMeses || 60;
+    document.getElementById('r_vpl_rot').textContent =
+      'VPL (' + meses + ' meses, taxa aplicação)';
+    document.getElementById('r_vpl').textContent = fmtMoeda(r.vpl);
+
+    if (r.tirMensalPercentual != null) {
+      document.getElementById('r_tir').textContent =
+        fmtPercentual(r.tirMensalPercentual) +
+        '% a.m. · ' +
+        fmtPercentual(r.tirAnualPercentual) +
+        '% a.a. (efetiva)';
+    } else {
+      document.getElementById('r_tir').textContent = '—';
+    }
+
     const diff = r.diferencialRendaFixa;
     document.getElementById('r_diff').textContent =
       (diff >= 0 ? '+ ' : '− ') + fmtMoeda(Math.abs(diff));
@@ -325,6 +342,7 @@
       prolabore: 'prolabore',
       equipamentos: 'equipamentos',
       vidaUtil: 'vidaUtil',
+      horizonte: 'horizonte',
     };
 
     let preencheu = false;

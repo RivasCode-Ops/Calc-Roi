@@ -52,4 +52,4 @@ test_*.py           → pytest espelhando *-engine.js
 
 ## Roadmap ativo
 
-V10: VPL, TIR, cenários salvos nomeados
+V10 concluído (VPL, TIR, cenários salvos). Próximo: validação `VALIDACAO.md` ou integração EduPrice no módulo Preço.

@@ -13,6 +13,8 @@ CENARIO_FATOR: dict[CenarioNome, float] = {
     "otimista": 1.25,
 }
 
+HORIZONTE_PADRAO_MESES = 60
+
 
 @dataclass(frozen=True)
 class EntradaRoi:
@@ -24,6 +26,7 @@ class EntradaRoi:
     prolabore_mensal: float = 0.0
     valor_equipamentos: float = 0.0
     vida_util_equipamentos_meses: int = 60
+    horizonte_analise_meses: int = HORIZONTE_PADRAO_MESES
 
 
 @dataclass(frozen=True)
@@ -37,6 +40,10 @@ class ResultadoRoi:
     roi_mensal_percentual: float
     roi_anual_percentual: float
     payback_meses: float | None
+    horizonte_analise_meses: int
+    vpl: float
+    tir_mensal_percentual: float | None
+    tir_anual_percentual: float | None
     rendimento_passivo_mensal: float
     rendimento_passivo_anual: float
     diferencial_renda_fixa: float
@@ -49,6 +56,72 @@ def _depreciacao_mensal(valor_equipamentos: float, vida_util_meses: int) -> floa
     if valor_equipamentos <= 0 or vida_util_meses <= 0:
         return 0.0
     return valor_equipamentos / vida_util_meses
+
+
+def _fator_anuidade(taxa_decimal: float, periodos: int) -> float:
+    if periodos <= 0:
+        return 0.0
+    if abs(taxa_decimal) < 1e-12:
+        return float(periodos)
+    return (1 - (1 + taxa_decimal) ** -periodos) / taxa_decimal
+
+
+def calcular_vpl(
+    investimento: float,
+    lucro_mensal: float,
+    taxa_mensal_pct: float,
+    horizonte_meses: int,
+) -> float:
+    if investimento <= 0 or horizonte_meses <= 0:
+        return 0.0
+    i = taxa_mensal_pct / 100
+    if lucro_mensal <= 0:
+        return -investimento
+    return lucro_mensal * _fator_anuidade(i, horizonte_meses) - investimento
+
+
+def calcular_tir_mensal(
+    investimento: float,
+    lucro_mensal: float,
+    horizonte_meses: int,
+) -> float | None:
+    if investimento <= 0 or lucro_mensal <= 0 or horizonte_meses <= 0:
+        return None
+
+    def npv(taxa_decimal: float) -> float:
+        if taxa_decimal <= -1:
+            return float("inf")
+        soma = -investimento
+        base = 1 + taxa_decimal
+        for t in range(1, horizonte_meses + 1):
+            soma += lucro_mensal / (base**t)
+        return soma
+
+    lo, hi = -0.99, 10.0
+    f_lo, f_hi = npv(lo), npv(hi)
+    if f_lo * f_hi > 0:
+        hi = 50.0
+        f_hi = npv(hi)
+        if f_lo * f_hi > 0:
+            return None
+
+    for _ in range(80):
+        mid = (lo + hi) / 2
+        f_mid = npv(mid)
+        if abs(f_mid) < 1e-7 or hi - lo < 1e-9:
+            return mid * 100
+        if f_lo * f_mid <= 0:
+            hi, f_hi = mid, f_mid
+        else:
+            lo, f_lo = mid, f_mid
+    return ((lo + hi) / 2) * 100
+
+
+def tir_anual_efetiva(tir_mensal_pct: float | None) -> float | None:
+    if tir_mensal_pct is None:
+        return None
+    r = tir_mensal_pct / 100
+    return ((1 + r) ** 12 - 1) * 100
 
 
 def _veredito(lucro: float, roi: float, diff: float, selic_mensal_pct: float) -> tuple[str, str]:
@@ -82,6 +155,11 @@ def calcular_cenario(entrada: EntradaRoi, cenario: CenarioNome = "base") -> Resu
     lucro_anual = lucro * 12
     roi_anual = (lucro_anual / inv) * 100 if inv > 0 else 0.0
 
+    horizonte = max(1, entrada.horizonte_analise_meses)
+    vpl = calcular_vpl(inv, lucro, selic_mensal_pct, horizonte)
+    tir_m = calcular_tir_mensal(inv, lucro, horizonte)
+    tir_a = tir_anual_efetiva(tir_m)
+
     veredito, semaforo = _veredito(lucro, roi, diff, selic_mensal_pct)
 
     return ResultadoRoi(
@@ -94,6 +172,10 @@ def calcular_cenario(entrada: EntradaRoi, cenario: CenarioNome = "base") -> Resu
         roi_mensal_percentual=roi,
         roi_anual_percentual=roi_anual,
         payback_meses=payback,
+        horizonte_analise_meses=horizonte,
+        vpl=vpl,
+        tir_mensal_percentual=tir_m,
+        tir_anual_percentual=tir_a,
         rendimento_passivo_mensal=rf,
         rendimento_passivo_anual=rf_anual,
         diferencial_renda_fixa=diff,

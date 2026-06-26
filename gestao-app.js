@@ -472,11 +472,16 @@
 
   document.getElementById('btn-pdf-gestao')?.addEventListener('click', () => {
     if (!ultimoResultado || !exporter) return;
-    exporter.exportarPdfGestao(
-      ultimoResultado.mestre,
-      ultimoResultado.resultado,
-      fmtMoeda
-    );
+    try {
+      exporter.exportarPdfGestao(
+        ultimoResultado.mestre,
+        ultimoResultado.resultado,
+        fmtMoeda
+      );
+    } catch (err) {
+      console.error(err);
+      alert('Não foi possível gerar o PDF. Atualize a página (Ctrl+F5) e tente de novo.');
+    }
   });
 
   document.getElementById('btn-limpar-storage')?.addEventListener('click', () => {

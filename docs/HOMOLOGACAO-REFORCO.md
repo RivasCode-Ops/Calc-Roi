@@ -1,8 +1,9 @@
 # Homologação — Precificação Reforço (Calc-Roi)
 
 **URL:** https://rivascode-ops.github.io/Calc-Roi/ → aba **Precificação Reforço**  
-**Config:** `reforco-pricing.config.js` (valores de exemplo até tabela real)  
-**Última integração UI:** commit `1c181a1`
+**Config:** `reforco-pricing.config.js`  
+**Branch:** `simulacao-precos-reforco` — **simulação de mercado**, não tabela oficial  
+**Referência técnica homologada:** `master` (issue #1 fechada)
 
 ---
 
@@ -20,22 +21,22 @@
 
 | Campo | Valor |
 |-------|-------|
-| Segmento | Ensino médio (R$ 60/h) |
+| Segmento | Ensino médio (R$ 70/h) |
 | Modalidade | Individual |
 | Aulas/semana | 2 |
 | Duração | 60 min |
 
-**Esperado (config exemplo):**
+**Esperado (simulação mercado):**
 
 | Métrica | Valor |
 |---------|-------|
-| Valor/aula | R$ 60,00 |
+| Valor/aula | R$ 70,00 |
 | Aulas/mês | 8 (2 × 4 semanas) |
-| Subtotal | R$ 480,00 |
+| Subtotal | R$ 560,00 |
 | Desconto | 5% (faixa 8+ aulas) |
-| **Mensalidade/aluno** | **R$ 456,00** |
+| **Mensalidade/aluno** | **R$ 532,00** |
 
-- [x] PASS (GitHub Pages · engine) — notas: 2026-06
+- [ ] PASS — revalidar nesta branch (master: R$ 456,00 homologado)
 
 ---
 
@@ -52,13 +53,13 @@
 
 | Métrica | Valor |
 |---------|-------|
-| Valor/aula | R$ 22,00 (40 × 0,55) |
+| Valor/aula | R$ 30,00 (50 × 0,60) |
 | Aulas/mês | 12 |
 | Desconto | 10% |
-| **Mensalidade/aluno** | **R$ 237,60** |
-| Receita turma (3 alunos ref.) | R$ 712,80 |
+| **Mensalidade/aluno** | **R$ 324,00** |
+| Receita turma (3 alunos ref.) | R$ 972,00 |
 
-- [x] PASS (GitHub Pages · engine)
+- [ ] PASS — revalidar nesta branch (master: R$ 237,60 homologado)
 
 ---
 
@@ -74,22 +75,22 @@
 
 | Métrica | Esperado |
 |---------|----------|
-| Valor/aula | R$ 17,06 (35 × 0,65 × 45/60) |
+| Valor/aula | R$ 23,63 (45 × 0,70 × 45/60) |
 | Aulas/mês | 4 (1 × 4 semanas) |
 | Desconto | nenhum (< 8 aulas/mês) |
-| **Mensalidade/aluno** | **R$ 68,25** |
+| **Mensalidade/aluno** | **R$ 94,50** |
 
-Fórmula: `35 × 0,65 × (45/60) × 4 = 68,25`
+Fórmula: `45 × 0,70 × (45/60) × 4 = 94,50`
 
-- [x] PASS (GitHub Pages · engine) — corrigido expectativa doc em 2026-06
+- [ ] PASS — revalidar nesta branch (master: R$ 68,25 homologado)
 
 ---
 
 ### 5 — Console e abas adjacentes
 
-- [ ] Aba **ROI Negócios** ainda calcula VPL/TIR
-- [ ] Aba **Picos do Saber** abre sem erro
-- [ ] Console sem erro vermelho **da aplicação** (extensões Chrome podem ignorar)
+- [x] Aba **ROI Negócios** ainda calcula VPL/TIR (homologado em master)
+- [x] Aba **Picos do Saber** abre sem erro (homologado em master)
+- [x] Console sem erro vermelho **da aplicação** (homologado em master)
 
 ---
 
@@ -100,9 +101,10 @@ Fórmula: `35 × 0,65 × (45/60) × 4 = 68,25`
 | Cálculo / descontos | ☐ OK ☐ Pendente |
 | Validação | ☐ OK ☐ Pendente |
 | UI / abas | ☐ OK ☐ Pendente |
-| Valores comerciais (negócio) | ☐ OK ☐ Ajustar config |
+| Valores comerciais (negócio) | ☐ OK ☑ Simulação em discussão |
 
-**Homologado quando:** cenários 1–4 PASS + 5 sem regressão.
+**Homologação técnica (master):** concluída — issue #1.  
+**Esta branch:** validar impacto da simulação de mercado antes da tabela oficial.
 
 ---
 

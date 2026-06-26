@@ -1,5 +1,5 @@
 param(
-    [int]$Port = 8080
+    [int]$Port = 8765
 )
 
 $root = Split-Path $PSScriptRoot -Parent

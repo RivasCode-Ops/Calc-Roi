@@ -37,7 +37,9 @@ Cadastre **uma vez** no **Painel Mestre**; todos os módulos calculam automatica
 pip install -r requirements.txt
 
 # Servidor local
-python -m http.server 8080
+python -m http.server 8765
+# ou: scripts/servir.ps1  |  SERVIR.bat (Windows)
+# Local: http://localhost:8765/
 # ou: scripts/servir.ps1  |  SERVIR.bat (Windows)
 
 # CLI ROI

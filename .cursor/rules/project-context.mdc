@@ -14,6 +14,7 @@ Dois módulos numa SPA estática (`index.html`):
 - **Picos do Saber** — Painel Mestre + 6 módulos de gestão escolar
 
 Live: https://rivascode-ops.github.io/Calc-Roi/  
+Local: http://localhost:8765/  
 Inventário: `docs/INVENTARIO-CALCULADORA.md`
 
 ## Stack

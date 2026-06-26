@@ -8,7 +8,8 @@ SPA estática com calculadora de ROI e gestão escolar (Picos do Saber). Sem bac
 
 ```bash
 # Servir localmente
-python -m http.server 8080
+python -m http.server 8765
+# http://localhost:8765/
 
 # Testes (motores ativos)
 python -m pytest test_calc_engine.py test_gestao_engine.py -q

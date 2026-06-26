@@ -8,7 +8,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo Raio-X de Negocios — http://127.0.0.1:8080
-start "Calc-Roi Server" python -m http.server 8080
+echo Raio-X de Negocios — http://127.0.0.1:8765
+start "Calc-Roi Server" python -m http.server 8765
 timeout /t 2 /nobreak >nul
-start "" "http://127.0.0.1:8080"
+start "" "http://127.0.0.1:8765"

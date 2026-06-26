@@ -3,6 +3,7 @@
 **Referência de código:** `master@8bd1b33` (produção / GitHub Pages · inclui este inventário) · branch `simulacao-precos-reforco@bf91a5c` (simulação comercial) · **26/06/2026**
 
 **URL produção:** https://rivascode-ops.github.io/Calc-Roi/  
+**URL local:** http://localhost:8765/ (`scripts/servir.ps1`, `SERVIR.bat` ou `python -m http.server 8765`)  
 **Inventário (GitHub):** https://github.com/RivasCode-Ops/Calc-Roi/blob/master/docs/INVENTARIO-CALCULADORA.md
 
 SPA estática (HTML/CSS/JS vanilla). Sem backend, sem build. Três abas principais no `index.html`.

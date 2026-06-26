@@ -35,7 +35,7 @@
 | Desconto | 5% (faixa 8+ aulas) |
 | **Mensalidade/aluno** | **R$ 456,00** |
 
-- [ ] PASSOU / FALHOU — notas: ___________
+- [x] PASS (GitHub Pages · engine) — notas: 2026-06
 
 ---
 
@@ -58,15 +58,15 @@
 | **Mensalidade/aluno** | **R$ 237,60** |
 | Receita turma (3 alunos ref.) | R$ 712,80 |
 
-- [ ] PASSOU / FALHOU — notas: ___________
+- [x] PASS (GitHub Pages · engine)
 
 ---
 
 ### 3 — Validação (form inválido)
 
-- [ ] Aulas/semana = 0 ou vazio → **"Revise os campos"**, página estável
-- [ ] Duração = 0 → idem
-- [ ] Sem travar browser / sem loop no console
+- [x] Aulas/semana = 0 ou vazio → **"Revise os campos"**, página estável
+- [x] Duração = 0 → idem (via engine)
+- [x] Sem travar browser / sem loop no console
 
 ---
 
@@ -74,12 +74,14 @@
 
 | Métrica | Esperado |
 |---------|----------|
-| Valor/aula | R$ 26,25 (35 × 0,65 × 45/60) |
-| Aulas/mês | 4 |
-| Desconto | nenhum |
-| Mensalidade/aluno | R$ 105,00 |
+| Valor/aula | R$ 17,06 (35 × 0,65 × 45/60) |
+| Aulas/mês | 4 (1 × 4 semanas) |
+| Desconto | nenhum (< 8 aulas/mês) |
+| **Mensalidade/aluno** | **R$ 68,25** |
 
-- [ ] PASSOU / FALHOU
+Fórmula: `35 × 0,65 × (45/60) × 4 = 68,25`
+
+- [x] PASS (GitHub Pages · engine) — corrigido expectativa doc em 2026-06
 
 ---
 

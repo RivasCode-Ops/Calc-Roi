@@ -32,7 +32,7 @@ https://rivascode-ops.github.io/Calc-Roi/ → aba **Precificação Reforço**
 | 1 | EM · individual · 2 aulas/sem · 60 min | R$ 456,00/aluno (desconto 5%) |
 | 2 | 1º–5º · trio · 3 aulas/sem · 60 min | R$ 237,60/aluno · receita turma R$ 712,80 |
 | 3 | Aulas/semana = 0 ou vazio | "Revise os campos" · sem travar |
-| 4 | Infantil · dupla · 1 aula/sem · 45 min | R$ 105,00/aluno |
+| 4 | Infantil · dupla · 1 aula/sem · 45 min | R$ 68,25/aluno (35×0,65×45/60×4) |
 | 5 | Abas ROI + Picos do Saber | Sem regressão · console limpo (app) |
 
 Detalhes: [`docs/HOMOLOGACAO-REFORCO.md`](./docs/HOMOLOGACAO-REFORCO.md)
@@ -43,11 +43,11 @@ Detalhes: [`docs/HOMOLOGACAO-REFORCO.md`](./docs/HOMOLOGACAO-REFORCO.md)
 
 | # | Cenário | Resultado | Observação |
 |---|---------|-----------|------------|
-| 1 | EM · individual · 2 aulas/sem | ☐ PASS ☐ FAIL | |
-| 2 | 1º–5º · trio · 3 aulas/sem | ☐ PASS ☐ FAIL | |
-| 3 | Form inválido | ☐ PASS ☐ FAIL | |
-| 4 | Infantil · dupla · 45 min | ☐ PASS ☐ FAIL | |
-| 5 | Regressão ROI + Picos | ☐ PASS ☐ FAIL | |
+| 1 | EM · individual · 2 aulas/sem | ☑ PASS ☐ FAIL | GitHub Pages · R$ 456,00 |
+| 2 | 1º–5º · trio · 3 aulas/sem | ☑ PASS ☐ FAIL | R$ 237,60/aluno |
+| 3 | Form inválido | ☑ PASS ☐ FAIL | Engine rejeita; UI estável |
+| 4 | Infantil · dupla · 45 min | ☑ PASS ☐ FAIL | Expectativa doc corrigida → R$ 68,25 |
+| 5 | Regressão ROI + Picos | ☐ PASS ☐ FAIL | Pendente validação manual |
 
 **Validação comercial (negócio):** ☐ Valores fazem sentido ☐ Ajustar config
 

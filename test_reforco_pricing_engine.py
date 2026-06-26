@@ -72,6 +72,29 @@ def test_dupla_fator_por_aluno():
     assert r["mensalidadePorAluno"] == pytest.approx(104)
 
 
+def test_infantil_dupla_45min():
+    r = calcular_preco_reforco(
+        {
+            "segmentoId": "infantil_4_5",
+            "modalidadeId": "dupla",
+            "aulasPorSemana": 1,
+            "duracaoMinutos": 45,
+        },
+        config={
+            **CONFIG,
+            "segmentos": {
+                "infantil_4_5": {"label": "Infantil", "valorHoraBase": 35},
+            },
+            "modalidades": {
+                **CONFIG["modalidades"],
+                "dupla": {"label": "Dupla", "fatorPorAluno": 0.65, "alunosReferencia": 2},
+            },
+        },
+    )
+    assert r["valorPorAula"] == pytest.approx(17.0625)
+    assert r["mensalidadePorAluno"] == pytest.approx(68.25)
+
+
 def test_desconto_12_aulas():
     r = calcular_preco_reforco(
         {"segmentoId": "fundamental_1_5", "modalidadeId": "individual", "aulasPorSemana": 3}

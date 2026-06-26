@@ -79,7 +79,9 @@ def test_caso_base_sem_inadimplencia_nem_evasao():
     assert r["receitaBruta"] == 35_000
     assert r["alunosPagantes"] == 50
     assert r["receitaLiquidaMensalidades"] == 35_000
+    assert r["entradasTotais"] == 35_000
     assert r["saidasOperacionais"] == 21_000
+    assert r["saidasTotais"] == 21_000
     assert r["fluxoMes"] == 14_000
     assert r["saldoFinal"] == 19_000
     assert r["veredito"]["semaforo"] == "verde"

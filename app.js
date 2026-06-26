@@ -26,10 +26,112 @@
   const cenariosEl = document.getElementById('cenarios');
   const toggleAvancado = document.getElementById('toggle-avancado');
   const avancado = document.getElementById('avancado');
+  const roiStorage = window.RoiStorage;
+  const listaCenariosEl = document.getElementById('roi_cenarios_lista');
+  const msgCenariosEl = document.getElementById('roi_cenarios_msg');
+  const inputNomeCenario = document.getElementById('roi_cenario_nome');
 
   if (!form || !resultado) return;
 
   let ultimoPacote = null;
+
+  function setMsgCenarios(texto, tipo) {
+    if (!msgCenariosEl) return;
+    msgCenariosEl.textContent = texto || '';
+    msgCenariosEl.style.color = tipo === 'erro' ? '#e53935' : '#888';
+  }
+
+  function renderListaCenarios() {
+    if (!listaCenariosEl || !roiStorage) return;
+    const lista = roiStorage.listar();
+    if (!lista.length) {
+      listaCenariosEl.innerHTML =
+        '<li class="cenarios-salvos-vazio">Nenhum cenário salvo ainda. Calcule e use &quot;Salvar cenário&quot;.</li>';
+      return;
+    }
+
+    listaCenariosEl.innerHTML = lista
+      .map((item) => {
+        const res = item.resumo || {};
+        const lucro =
+          res.lucroMensal != null ? fmtMoeda(res.lucroMensal) + '/mês' : '—';
+        const meta = [
+          lucro,
+          res.roiAnualPercentual != null ? res.roiAnualPercentual.toFixed(1) + '% a.a.' : null,
+          res.veredito || null,
+          roiStorage.formatarDataSalva(item.savedAt),
+        ]
+          .filter(Boolean)
+          .join(' · ');
+        const sem = res.semaforo || '';
+        return `
+        <li class="cenario-salvo-item ${sem}">
+          <div class="cenario-salvo-info">
+            <div class="cenario-salvo-nome">${escapeHtml(item.nome)}</div>
+            <div class="cenario-salvo-meta">${escapeHtml(meta)}</div>
+          </div>
+          <div class="cenario-salvo-acoes">
+            <button type="button" class="btn-mini" data-acao="carregar" data-id="${item.id}">Carregar</button>
+            <button type="button" class="btn-mini danger" data-acao="excluir" data-id="${item.id}">Excluir</button>
+          </div>
+        </li>`;
+      })
+      .join('');
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function carregarCenarioSalvo(id) {
+    if (!roiStorage) return;
+    const item = roiStorage.obter(id);
+    if (!item) {
+      setMsgCenarios('Cenário não encontrado.', 'erro');
+      renderListaCenarios();
+      return;
+    }
+    roiStorage.aplicarFormulario(form, item.formData);
+    document.querySelectorAll('.input-moeda').forEach(formatarCampoMoeda);
+    atualizarHintRendimento();
+    if (inputNomeCenario) inputNomeCenario.value = item.nome;
+    setMsgCenarios('Cenário "' + item.nome + '" carregado. Revise e clique em Analisar.', null);
+    calcular();
+  }
+
+  function excluirCenarioSalvo(id) {
+    if (!roiStorage) return;
+    const item = roiStorage.obter(id);
+    if (!item) {
+      renderListaCenarios();
+      return;
+    }
+    if (!window.confirm('Excluir o cenário "' + item.nome + '"?')) return;
+    roiStorage.remover(id);
+    setMsgCenarios('Cenário "' + item.nome + '" excluído.', null);
+    renderListaCenarios();
+  }
+
+  function salvarCenarioAtual() {
+    if (!roiStorage) return;
+    if (!ultimoPacote) {
+      setMsgCenarios('Calcule primeiro para salvar um cenário.', 'erro');
+      return;
+    }
+    const nome = inputNomeCenario?.value || '';
+    const res = roiStorage.salvar(nome, form, ultimoPacote.base);
+    if (!res.ok) {
+      setMsgCenarios(res.erro, 'erro');
+      return;
+    }
+    setMsgCenarios('Cenário "' + res.item.nome + '" salvo.', null);
+    if (inputNomeCenario) inputNomeCenario.value = '';
+    renderListaCenarios();
+  }
 
   function atualizarHintRendimento() {
     const hint = document.getElementById('hint_rendimento');
@@ -264,6 +366,23 @@
       }, 2000);
     });
   });
+
+  document.getElementById('btn-salvar-cenario')?.addEventListener('click', salvarCenarioAtual);
+  inputNomeCenario?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      salvarCenarioAtual();
+    }
+  });
+  listaCenariosEl?.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-acao]');
+    if (!btn) return;
+    const id = btn.getAttribute('data-id');
+    if (btn.getAttribute('data-acao') === 'carregar') carregarCenarioSalvo(id);
+    if (btn.getAttribute('data-acao') === 'excluir') excluirCenarioSalvo(id);
+  });
+
+  renderListaCenarios();
 
   window.feedback = function feedback(resp) {
     document.querySelectorAll('.fb-btn').forEach((b) => b.classList.remove('selecionado'));

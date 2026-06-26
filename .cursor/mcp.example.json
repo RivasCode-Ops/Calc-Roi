@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "node",
+      "args": [
+        "C:/dev/mcp/filesystem/dist/index.js",
+        "C:/Users/Nitro/Projects/Calc-Roi"
+      ]
+    },
+    "github": {
+      "command": "node",
+      "args": ["C:/dev/mcp/github/dist/index.js"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "seu_token_aqui"
+      }
+    },
+    "postgres": {
+      "command": "node",
+      "args": [
+        "C:/dev/mcp/postgres/dist/index.js",
+        "postgresql://postgres:senha@localhost:5432/sige_dev"
+      ]
+    }
+  }
+}

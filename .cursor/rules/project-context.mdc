@@ -1,0 +1,55 @@
+---
+description: Stack, arquitetura e convenções do Calc-Roi
+alwaysApply: true
+---
+
+# Calc-Roi — Project Context
+
+## Produto
+
+Dois módulos numa SPA estática (`index.html`):
+
+- **ROI Negócios** — payback, cenários, comparativo com renda fixa
+- **Picos do Saber** — Painel Mestre + 6 módulos de gestão escolar
+
+Live: https://rivascode-ops.github.io/Calc-Roi
+
+## Stack
+
+- HTML + CSS inline + JavaScript vanilla (IIFE, sem bundler)
+- Chart.js + jsPDF via CDN
+- Python 3 + pytest (espelho dos motores JS)
+- Deploy: GitHub Pages · zero build
+
+## Arquitetura
+
+```
+index.html          → shell SPA (abas ROI / Gestão)
+*-engine.js         → lógica pura (window.CalcEngine, window.GestaoEngine)
+*-app.js            → DOM, eventos, renderização
+gestao-storage.js   → localStorage (picos_gestao_mestre_v1)
+gestao-charts.js    → Chart.js
+gestao-export.js    → jsPDF
+calc_engine.py      → espelho Python do ROI (CLI + testes)
+test_*.py           → pytest espelhando *-engine.js
+```
+
+## Princípios
+
+- **Motores puros**: cálculo em `*-engine.js`; UI só em `*-app.js`
+- **Espelho JS ↔ Python**: alterou motor JS → atualizar `calc_engine.py` / `test_*.py`
+- **Sem build**: não introduzir webpack/vite sem pedido explícito
+- **CDN com versão fixa** em `index.html` (`?v=N` nos scripts locais)
+- Commits pequenos; não alterar código não relacionado à tarefa
+- Arquivos legados (`escola-*`, `preco-*`) não estão no `index.html` — não reativar sem decisão
+
+## Nomenclatura
+
+- Motores: `*-engine.js` / `calc_engine.py`
+- UI: `*-app.js`
+- Testes: `test_<motor>_engine.py`
+- Globals: `window.CalcEngine`, `window.GestaoEngine`
+
+## Roadmap ativo
+
+V10: VPL, TIR, cenários salvos nomeados

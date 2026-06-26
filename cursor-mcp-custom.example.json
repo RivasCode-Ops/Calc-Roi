@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "calc-roi-context": {
+      "command": "node",
+      "args": ["scripts/mcp-placeholder.js"],
+      "env": {
+        "PROJECT_NAME": "Calc-Roi"
+      }
+    }
+  }
+}

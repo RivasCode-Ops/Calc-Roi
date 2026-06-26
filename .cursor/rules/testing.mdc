@@ -1,0 +1,31 @@
+---
+description: Testes pytest e paridade JS/Python
+globs: test_*.py
+alwaysApply: false
+---
+
+# Testes
+
+## Comando
+
+```bash
+python -m pytest test_calc_engine.py test_gestao_engine.py -q
+```
+
+Todos os testes (incl. legado):
+
+```bash
+python -m pytest -q
+```
+
+## Regras
+
+- Testes espelham a lógica de `*-engine.js`, não a UI
+- Use `pytest.approx()` para floats
+- Nomes de teste descrevem o comportamento (`test_cenario_base_lucro_positivo`)
+- Ao corrigir bug no motor JS, reproduza o caso no pytest primeiro
+- Não mockar DOM — este projeto não tem testes de front-end ainda
+
+## CI
+
+GitHub Actions roda pytest em push/PR para `master`.

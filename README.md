@@ -25,10 +25,32 @@ Cadastre **uma vez** no **Painel Mestre**; todos os módulos calculam automatica
 
 ## Como usar (web)
 
-1. Abra `index.html`, `SERVIR.bat` ou GitHub Pages
+1. Abra `index.html`, `SERVIR.bat`, `scripts/servir.ps1` ou GitHub Pages
 2. Aba **Picos do Saber** → preencha o **Painel Mestre**
 3. Navegue pelos módulos — os dados persistem ao recarregar a página
 4. **Copiar análise** ou **Baixar PDF** para apresentar ao sócio/contador
+
+## Desenvolvimento
+
+```bash
+# Dependências Python (testes)
+pip install -r requirements.txt
+
+# Servidor local
+python -m http.server 8080
+# ou: scripts/servir.ps1  |  SERVIR.bat (Windows)
+
+# CLI ROI
+python calc_roi.py
+```
+
+**Cursor:** regras em `.cursor/rules/`, guia em `AGENTS.md`, MCP em `docs/MCP-SETUP.md`.
+
+```bash
+# Configurar MCP do projeto (v2 — dry-run + checklist primeiro)
+node cursor-mcp-configurator-v2.js --servers filesystem,github,postgres,fetch,memory --project --dry-run --print-checklist
+node cursor-mcp-configurator-v2.js --servers filesystem,github,postgres,fetch,memory --project --open-cursor --print-checklist
+```
 
 ## Testes
 
@@ -55,8 +77,9 @@ python -m pytest test_calc_engine.py test_gestao_engine.py -q
 - [x] V2 — Cenários, depreciação, comparativo renda fixa
 - [x] V3 Gestão — Painel Mestre ERP, 6 módulos automáticos
 - [x] V9 — localStorage, gráficos, PDF, resumo executivo
-- [ ] V10 — VPL, TIR, cenários salvos nomeados
+- [x] V10 (parcial) — cenários ROI salvos com nome
+- [ ] V10 — VPL, TIR
 
 ## Stack
 
-HTML + CSS + JavaScript vanilla · Chart.js + jsPDF (CDN) · Python 3 · zero build · GitHub Pages
+HTML + CSS + JavaScript vanilla · Chart.js + jsPDF (CDN) · Python 3 + pytest · zero build · GitHub Pages · CI (GitHub Actions)

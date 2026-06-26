@@ -1,0 +1,33 @@
+---
+description: Padrões dos motores de cálculo ROI e Gestão Escolar
+globs: **/*engine*.{js,py}
+alwaysApply: false
+---
+
+# Motores de cálculo
+
+## ROI (`calc-engine.js` ↔ `calc_engine.py`)
+
+- Cenários: `pessimista` (0.75×), `base` (1.0×), `otimista` (1.25×)
+- Fórmulas: depreciação = equipamentos / vida útil; payback = investimento / lucro
+- Comparativo renda fixa: taxa anual → mensal; diff = lucro − rendimento fixo
+- Semáforo/veredito: derivados do lucro e do diff vs. renda fixa
+
+## Gestão (`gestao-engine.js`)
+
+- `defaultsMestre()` define estrutura do Painel Mestre
+- `parseDec()` aceita vírgula como decimal
+- `arredondarMensalidade()` arredonda para múltiplos de 50
+- Módulos: viabilidade, capacidade, preço, ROI, cenários, equilíbrio
+
+## Ao alterar um motor
+
+1. Manter funções puras (sem DOM, sem `localStorage`)
+2. Exportar via `window.*` no JS
+3. Atualizar teste Python correspondente com os mesmos números de exemplo
+4. Bump `?v=N` nos `<script>` do `index.html` se mudou JS servido
+
+## Formatação BR
+
+- Moeda: `R$` com separadores pt-BR na UI (`app.js` / `gestao-app.js`)
+- Percentuais: exibir com 1–2 casas conforme o módulo existente
